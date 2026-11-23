@@ -1,0 +1,60 @@
+name: Android (APK e AAB)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Preparar app
+        run: |
+          npm ci
+          npm run build
+          npx cap sync android
+      - name: APK de teste (debug)
+        working-directory: android
+        run: ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: alerta-portugal-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+
+      # Versão para a Google Play: só corre quando os secrets da chave estiverem configurados (ver PUBLICAR.md)
+      - name: Chave de assinatura
+        id: keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then
+            echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/release.jks"
+            echo "path=$RUNNER_TEMP/release.jks" >> "$GITHUB_OUTPUT"
+          fi
+      - name: APK e AAB assinados (release)
+        if: steps.keystore.outputs.path != ''
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PATH: ${{ steps.keystore.outputs.path }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          VERSION_CODE: ${{ github.run_number }}
+        run: ./gradlew assembleRelease bundleRelease
+      - uses: actions/upload-artifact@v4
+        if: steps.keystore.outputs.path != ''
+        with:
+          name: alerta-portugal-release
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/bundle/release/*.aab
