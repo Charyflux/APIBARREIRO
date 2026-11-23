@@ -697,9 +697,9 @@ $('g-out').onclick=()=>SB.auth.signOut();
 // ---------- reportes ao vivo ----------
 async function loadReports(){
   const since=new Date(Date.now()-90*864e5).toISOString();
-  const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,user_id,oculto,perfis(nome),confirmacoes(user_id)').gte('quando',since).order('quando',{ascending:false}).limit(3000);
+  const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,criado,user_id,oculto,perfis(nome),confirmacoes(user_id)').gte('quando',since).order('quando',{ascending:false}).limit(3000);
   if(error){live('Erro');return}
-  reports=data.filter(x=>!x.oculto||x.user_id===me).map(x=>({id:x.id,cat:x.cat,lat:x.lat,lng:x.lng,descricao:x.descricao,quando:x.quando,autor:x.user_id,
+  reports=data.filter(x=>!x.oculto||x.user_id===me).map(x=>({id:x.id,cat:x.cat,lat:x.lat,lng:x.lng,descricao:x.descricao,quando:x.quando,criado:x.criado,autor:x.user_id,
     autorNome:(x.perfis&&x.perfis.nome)||'Utilizador',oculto:x.oculto,confirmacoes:Object.fromEntries((x.confirmacoes||[]).map(c=>[c.user_id,true]))}));
   live('Ao vivo',true);render();
   if(current&&!$('s-detail').hidden){const c=reports.find(r=>r.id===current.id);if(c)showDetail(c,true);else closeAll()}
@@ -767,7 +767,7 @@ function renderList(){
     b.innerHTML=`<span class="ic">${badge(r.cat,34)}</span><span><strong></strong><p></p><small></small></span>`;
     b.querySelector('strong').textContent=CATS[r.cat].label;
     const p=b.querySelector('p');if(r.descricao)p.textContent=r.descricao;else p.remove();
-    b.querySelector('small').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'')+(r.autorNome?' · por '+r.autorNome:'');
+    b.querySelector('small').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'')+(r.autorNome?' · por '+r.autorNome:'')+(posted(r.criado||r.quando)?(r.autorNome?' a ':' · publicado a ')+posted(r.criado||r.quando):'');
     b.onclick=()=>{if(window.innerWidth<760)toggleList(false);map.flyTo([r.lat,r.lng],Math.max(map.getZoom(),13),{duration:.8});showDetail(r,false,true)};
     box.append(b)}
 }
@@ -867,6 +867,8 @@ $('s-form').addEventListener('submit',async e=>{
 });
 
 // ---------- detail ----------
+const FMT_D=new Intl.DateTimeFormat('pt-PT',{timeZone:'Europe/Lisbon',day:'2-digit',month:'2-digit',year:'numeric'}),FMT_H=new Intl.DateTimeFormat('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit',hour12:false});
+function posted(iso){const d=new Date(iso);if(isNaN(d))return '';return FMT_D.format(d)+' às '+FMT_H.format(d)}
 function ago(iso){const m=Math.round((Date.now()-new Date(iso))/6e4);if(m<1)return 'agora mesmo';if(m<60)return 'há '+m+' min';const h=Math.round(m/60);if(h<24)return 'há '+h+' h';const d=Math.round(h/24);return d===1?'ontem':'há '+d+' dias'}
 function showDetail(r,keep,nopan){
   if(!keep){closeAll();if(!nopan)map.panTo([r.lat,r.lng])}
@@ -880,8 +882,10 @@ function showDetail(r,keep,nopan){
   $('d-confirm').disabled=mine||r.autor===(me||'local');$('d-confirm').textContent=mine?'Já confirmaste':'Também vi isto';
   const own=r.autor===(me||'local');
   $('d-del').hidden=!(own||(SB&&perfil&&perfil.admin));$('d-del').dataset.c='';$('d-del').textContent=own?'Apagar o meu reporte':'Apagar (administrador)';
-  $('d-by').hidden=!r.autorNome;$('d-by').textContent='';
-  if(r.autorNome){const nb=document.createElement('b');nb.textContent=r.autorNome;$('d-by').append('Marcado por ',nb,own?' (tu)':'',r.oculto?' · escondido após denúncias, à espera de revisão':'')}
+  const pq=posted(r.criado||r.quando);$('d-by').hidden=!(r.autorNome||pq);$('d-by').textContent='';
+  if(r.autorNome){const nb=document.createElement('b');nb.textContent=r.autorNome;$('d-by').append('Publicado por ',nb,own?' (tu)':'')}
+  if(pq){const tb=document.createElement('b');tb.textContent=pq;$('d-by').append(r.autorNome?' a ':'Publicado a ',tb)}
+  if(r.oculto)$('d-by').append(' · escondido após denúncias, à espera de revisão');
   $('d-flag').hidden=!(SB&&!own);$('d-flagbox').hidden=true;
   $('s-detail').hidden=false;setUI('sheet');
 }
