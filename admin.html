@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Administração · Alerta Portugal</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
+<style>
+:root{--bg:#eeeeea;--fg:#1f2433;--muted:#6c7283;--card:#fff;--card-2:#f1f2f5;--line:#e2e4ea;--viol:#ff4d5e;--park:#2f6bff;--ok:#18b26b;--sun:#ffcf33;
+  --font:"Nunito",ui-rounded,"Segoe UI",system-ui,sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0f1530;--fg:#eef1ff;--muted:#a5add0;--card:#1a2142;--card-2:#232c55;--line:#323c6e;--viol:#ff5c6c;--park:#4d82ff;--ok:#2bd284;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1530;--fg:#eef1ff;--muted:#a5add0;--card:#1a2142;--card-2:#232c55;--line:#323c6e;--viol:#ff5c6c;--park:#4d82ff;--ok:#2bd284;color-scheme:dark}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:700 15px/1.5 var(--font)}
+main{max-width:860px;margin:0 auto;padding:20px 16px 60px}
+h1{font:900 1.6rem var(--font);margin:.2em 0}
+h2{font:900 1.15rem var(--font);margin:0 0 10px}
+a{color:var(--park)}
+.muted{color:var(--muted)}
+section{background:var(--card);border-radius:20px;padding:16px;margin:14px 0;box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab,.btn{border:0;border-radius:999px;font:900 .9rem var(--font);padding:9px 14px;cursor:pointer;background:var(--card-2);color:var(--fg)}
+.tab[aria-selected="true"]{background:var(--fg);color:var(--bg)}
+.btn.red{background:var(--viol);color:#fff}.btn.green{background:var(--ok);color:#fff}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.item{border-top:2px solid var(--line);padding:12px 0;display:flex;flex-direction:column;gap:6px}
+.item:first-child{border-top:0}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tag{font:900 .75rem var(--font);padding:2px 8px;border-radius:999px;background:var(--card-2)}
+.tag.red{background:color-mix(in srgb,var(--viol) 20%,var(--card));color:var(--viol)}
+input[type=search],input[type=number]{font:700 1rem var(--font);color:var(--fg);background:var(--card-2);border:2px solid transparent;border-radius:12px;padding:9px 12px;box-sizing:border-box}
+input[type=search]{width:100%}
+input[type=number]{width:90px}
+label.set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:2px solid var(--line)}
+label.set:first-of-type{border-top:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:900}
+</style>
+</head>
+<body><main>
+<p><a href="./">← Voltar ao mapa</a></p>
+<h1>Administração</h1>
+<p class="muted" id="who">A verificar a tua sessão…</p>
+
+<div id="noaccess" hidden><section><p id="noaccess-msg">Só administradores podem ver esta página. Entra primeiro na app com a tua conta.</p></section></div>
+
+<div id="panel" hidden>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="den" aria-selected="true">Denúncias</button>
+    <button class="tab" role="tab" data-tab="rep" aria-selected="false">Últimos reportes</button>
+    <button class="tab" role="tab" data-tab="usr" aria-selected="false">Utilizadores</button>
+    <button class="tab" role="tab" data-tab="def" aria-selected="false">Definições</button>
+  </div>
+
+  <section id="t-den"><h2>Reportes denunciados</h2><div id="den-list" class="muted">A carregar…</div></section>
+  <section id="t-rep" hidden><h2>Últimos 100 reportes</h2><div id="rep-list" class="muted">A carregar…</div></section>
+  <section id="t-usr" hidden><h2>Utilizadores</h2>
+    <input type="search" id="usr-q" placeholder="Procurar pelo nome" aria-label="Procurar utilizador">
+    <div id="usr-list" class="muted" style="margin-top:10px">A carregar…</div></section>
+  <section id="t-def" hidden><h2>Definições</h2>
+    <label class="set">Exigir telemóvel confirmado por SMS para publicar <input type="checkbox" id="d-tel"></label>
+    <label class="set">Reportes por dia numa conta nova <input type="number" min="0" max="100" id="d-ln"></label>
+    <label class="set">Reportes por dia nas outras contas <input type="number" min="0" max="500" id="d-lo"></label>
+    <label class="set">Dias em que uma conta conta como nova <input type="number" min="0" max="365" id="d-dias"></label>
+    <label class="set">Denúncias que escondem um reporte até ser revisto <input type="number" min="1" max="50" id="d-den"></label>
+    <p class="muted">Só ativa o SMS depois de configurares um fornecedor de SMS no Supabase (ver PUBLICAR.md). Sem isso ninguém consegue confirmar o telemóvel.</p>
+    <button class="btn green" id="d-save">Guardar definições</button></section>
+</div>
+<div class="toast" id="toast" hidden></div>
+</main>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const CFG=window.ALERTA_CONFIG||{};
+const CATS={violencia:'Violência',estacionamento:'Mau estacionamento'};
+function toast(t){$('toast').textContent=t;$('toast').hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').hidden=true,2600)}
+function deny(t){$('who').hidden=true;$('noaccess').hidden=false;if(t)$('noaccess-msg').textContent=t}
+const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e};
+const btn=(text,cls,fn)=>{const b=el('button','btn '+(cls||''),text);b.onclick=async()=>{b.disabled=true;try{await fn(b)}finally{b.disabled=false}};return b};
+const when=iso=>new Date(iso).toLocaleString('pt-PT',{dateStyle:'short',timeStyle:'short'});
+if(!(CFG.supabaseUrl&&CFG.supabaseAnonKey)){deny('A base de dados ainda não está configurada (config.js).');return}
+if(!window.supabase){deny('Não foi possível ligar ao servidor.');return}
+const SB=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey);
+let me=null;
+
+async function check(e){if(e&&e.error){toast('Erro: '+(e.error.message||'tenta outra vez'));return false}return true}
+function reportItem(r,withFlags){
+  const it=el('div','item');
+  const head=el('div','row');head.append(el('strong',null,CATS[r.cat]||r.cat),el('span','muted',when(r.quando)));
+  if(r.oculto)head.append(el('span','tag red','Escondido'));
+  if(withFlags)head.append(el('span','tag red',r.denuncias.length+(r.denuncias.length===1?' denúncia':' denúncias')));
+  it.append(head);
+  const by=el('div','muted');by.append('Por ',el('b',null,(r.perfis&&r.perfis.nome)||'?'));if(r.perfis&&r.perfis.bloqueado)by.append(' ',el('span','tag red','bloqueado'));it.append(by);
+  it.append(el('div',null,r.descricao||'(sem descrição)'));
+  if(withFlags){const m=[...new Set(r.denuncias.map(d=>d.motivo).filter(Boolean))];if(m.length)it.append(el('div','muted','Motivos: '+m.join(', ')))}
+  const a=el('a',null,'Ver no OpenStreetMap');a.href=`https://www.openstreetmap.org/?mlat=${r.lat}&mlon=${r.lng}#map=17/${r.lat}/${r.lng}`;a.target='_blank';a.rel='noopener';it.append(a);
+  const acts=el('div','row');
+  acts.append(twoTap('Apagar reporte','red',async()=>{if(await check(await SB.from('reportes').delete().eq('id',r.id))){toast('Reporte apagado');loadAll()}}));
+  if(withFlags)acts.append(btn('Está correto: mostrar outra vez','green',async()=>{if(await check(await SB.rpc('admin_aprovar',{reporte:r.id}))){toast('Reporte aprovado');loadAll()}}));
+  if(r.user_id!==me&&r.perfis&&!r.perfis.bloqueado)acts.append(twoTap('Bloquear autor e apagar os reportes dele','red',async()=>{
+    if(await check(await SB.rpc('admin_bloquear',{alvo:r.user_id,bloquear:true,apagar_reportes:true}))){toast('Autor bloqueado');loadAll()}}));
+  it.append(acts);return it}
+function twoTap(text,cls,fn){const b=btn(text,cls,async()=>{if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Toca outra vez para confirmar';return}b.dataset.c='';b.textContent=text;await fn()});return b}
+
+async function loadFlags(){
+  const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,oculto,user_id,perfis(nome,bloqueado),denuncias!inner(motivo,criado)').order('quando',{ascending:false}).limit(200);
+  const box=$('den-list');box.innerHTML='';box.className='';
+  if(error){box.textContent='Erro: '+error.message;return}
+  if(!data.length){box.className='muted';box.textContent='Não há denúncias por rever.';return}
+  data.sort((a,b)=>b.denuncias.length-a.denuncias.length);
+  for(const r of data)box.append(reportItem(r,true))}
+async function loadReps(){
+  const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,oculto,user_id,perfis(nome,bloqueado)').order('criado',{ascending:false}).limit(100);
+  const box=$('rep-list');box.innerHTML='';box.className='';
+  if(error){box.textContent='Erro: '+error.message;return}
+  if(!data.length){box.className='muted';box.textContent='Ainda não há reportes.';return}
+  for(const r of data)box.append(reportItem(r,false))}
+let users=[];
+async function loadUsers(){
+  const {data,error}=await SB.from('perfis').select('id,nome,criado,bloqueado,admin,reportes(count)').order('criado',{ascending:false}).limit(1000);
+  if(error){$('usr-list').textContent='Erro: '+error.message;return}
+  users=data;drawUsers()}
+function drawUsers(){
+  const q=$('usr-q').value.trim().toLowerCase();const box=$('usr-list');box.innerHTML='';box.className='';
+  const list=users.filter(u=>!q||u.nome.toLowerCase().includes(q)).slice(0,200);
+  if(!list.length){box.className='muted';box.textContent='Ninguém encontrado.';return}
+  for(const u of list){const it=el('div','item');const head=el('div','row');
+    head.append(el('strong',null,u.nome),el('span','muted','desde '+new Date(u.criado).toLocaleDateString('pt-PT')),el('span','tag',((u.reportes&&u.reportes[0]&&u.reportes[0].count)||0)+' reportes'));
+    if(u.admin)head.append(el('span','tag','admin'));if(u.bloqueado)head.append(el('span','tag red','bloqueado'));
+    it.append(head);
+    if(u.id!==me){const acts=el('div','row');
+      if(u.bloqueado)acts.append(btn('Desbloquear','green',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:false}))){toast('Conta desbloqueada');loadAll()}}));
+      else{acts.append(twoTap('Bloquear','red',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:true}))){toast('Conta bloqueada');loadAll()}}),
+        twoTap('Bloquear e apagar os reportes','red',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:true,apagar_reportes:true}))){toast('Conta bloqueada');loadAll()}}))}
+      it.append(acts)}
+    box.append(it)}}
+$('usr-q').oninput=drawUsers;
+async function loadDefs(){const {data}=await SB.from('definicoes').select('*').eq('id',1).maybeSingle();if(!data)return;
+  $('d-tel').checked=data.exigir_telemovel;$('d-ln').value=data.limite_conta_nova;$('d-lo').value=data.limite_normal;$('d-dias').value=data.dias_conta_nova;$('d-den').value=data.denuncias_para_ocultar}
+$('d-save').onclick=async()=>{const v={exigir_telemovel:$('d-tel').checked,limite_conta_nova:+$('d-ln').value,limite_normal:+$('d-lo').value,dias_conta_nova:+$('d-dias').value,denuncias_para_ocultar:Math.max(1,+$('d-den').value)};
+  if(await check(await SB.from('definicoes').update(v).eq('id',1)))toast('Definições guardadas')};
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);$('t-'+x.dataset.tab).hidden=!on})});
+function loadAll(){loadFlags();loadReps();loadUsers()}
+
+(async()=>{
+  const {data:{session}}=await SB.auth.getSession();
+  if(!session){deny('Entra primeiro na app com a tua conta de administrador e depois volta a esta página.');return}
+  me=session.user.id;
+  const {data:p}=await SB.from('perfis').select('nome,admin,bloqueado').eq('id',me).maybeSingle();
+  if(!p||!p.admin||p.bloqueado){deny('A tua conta não é de administrador.');return}
+  $('who').textContent='Sessão de '+p.nome+'.';$('panel').hidden=false;loadAll();loadDefs();
+})();
+})();
+</script>
+</body></html>
