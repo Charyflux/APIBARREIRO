@@ -8,10 +8,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.webp">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<style>.pill.sub{background:var(--sun,#ffc94a)!important;color:var(--sun-ink,#3a2300)!important;text-decoration:none;gap:6px;font-weight:900}
-@media (max-width:759px){.pill.sub{order:-1}.pill.sub .subtxt{font-size:0}.pill.sub .subtxt::after{content:"Assinar";font-size:.85rem}}
-.pill.sub:hover{filter:brightness(1.05);transform:translateY(-1px)}
-.confetti{position:fixed;inset:0;pointer-events:none;z-index:5000;overflow:hidden}
+<style>.confetti{position:fixed;inset:0;pointer-events:none;z-index:5000;overflow:hidden}
 .confetti i{position:absolute;top:38%;width:9px;height:14px;animation:conf 1.9s cubic-bezier(.15,.7,.4,1) forwards}
 @keyframes conf{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
 .pin.hot svg{animation:wig 2.4s ease-in-out infinite;transform-origin:50% 100%}
@@ -231,7 +228,6 @@ textarea{resize:none;min-height:70px}
     <label class="pill period" for="period"><select id="period" aria-label="Período">
       <option value="1">Últimas 24 h</option><option value="7">7 dias</option><option value="30" selected>30 dias</option><option value="0">Sempre</option>
     </select></label>
-    <a class="pill sub" id="subbtn" href="https://pay.cakto.com.br/yaj635u_1361271" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z" fill="currentColor"/></svg><span class="subtxt">Assinar mensal</span></a>
   </div>
   <div class="recent" id="recent" hidden>
     <h3>Reportes recentes</h3>
