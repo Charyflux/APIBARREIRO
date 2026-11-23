@@ -174,6 +174,30 @@ textarea{resize:none;min-height:70px}
 .gdpr{display:flex;gap:10px;font:700 .78rem var(--font);line-height:1.45;color:var(--muted);background:var(--card-2);border-radius:16px;padding:12px}
 .gdpr svg{flex:none;color:var(--ok)}
 .actions{display:flex;gap:10px}
+/* conta, entrada e denúncias */
+.inp{font:700 1rem var(--font);color:var(--fg);background:var(--card-2);border:2px solid transparent;border-radius:16px;padding:12px 14px;width:100%;box-sizing:border-box}
+.inp:focus{outline:none;border-color:var(--park)}
+.gate{position:fixed;inset:0;z-index:4000;display:grid;place-items:center;padding:16px;background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overflow:auto}
+.gate-card{width:100%;max-width:420px;background:var(--card);color:var(--fg);border-radius:28px;box-shadow:0 20px 60px rgba(0,0,0,.3);padding:24px 20px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px}
+.gate-card>div:not(.gate-logo),.gate-card>form{display:flex;flex-direction:column;gap:12px}
+.gate-card h2{font:900 1.35rem var(--font);margin:0;text-wrap:balance}
+.gate-card .lead{margin:0;color:var(--muted);font-weight:700;font-size:.92rem;line-height:1.45}
+.gate-logo{display:flex;align-items:center;gap:10px;font:900 1.1rem var(--font)}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font:800 .8rem var(--font)}
+.or::before,.or::after{content:"";flex:1;height:2px;background:var(--line)}
+.note{font:700 .88rem/1.45 var(--font);border-radius:14px;padding:10px 12px;background:color-mix(in srgb,var(--sun) 22%,var(--card));color:var(--fg)}
+.note a,.gate a{color:var(--park);font-weight:800}
+.check{display:flex;gap:10px;align-items:flex-start;font:800 .9rem/1.4 var(--font);cursor:pointer}
+.check input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--ok)}
+.linkbtn{border:0;background:none;color:var(--muted);font:800 .88rem var(--font);text-decoration:underline;cursor:pointer;padding:6px;align-self:center}
+.d-by{margin:-6px 0 0;font:700 .92rem var(--font);color:var(--muted)}
+.d-by b{color:var(--fg)}
+.flagbox{display:flex;flex-direction:column;gap:10px}
+.flagbox p{margin:0;font:900 .95rem var(--font)}
+.flagbox .quickwhen{flex-wrap:wrap}
+.who{font:800 .85rem var(--font);color:var(--muted)}
+.who b{color:var(--fg)}
+
 .actions .btn{flex:1}
 .d-head{display:flex;align-items:center;gap:12px}
 .d-head .ic{width:52px;height:52px;flex:none}
@@ -241,6 +265,7 @@ textarea{resize:none;min-height:70px}
   <button class="round" id="zin" aria-label="Aproximar">+</button>
   <button class="round" id="zout" aria-label="Afastar">−</button>
   <button class="round" id="home" aria-label="Ver Portugal inteiro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M12 2 4 21l8-4 8 4z"/></svg></button>
+  <button class="round" id="acct" aria-label="A minha conta" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
 </div>
 
 
@@ -288,8 +313,9 @@ textarea{resize:none;min-height:70px}
     </label>
     <div class="count" id="count">0 / 140</div>
     <div class="err" id="err" hidden></div>
+    <div class="who" id="f-who" hidden></div>
     <div class="gdpr"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
-      <span>Sem matrículas, nomes, telefones nem fotos (RGPD). A posição é arredondada a uns 10 metros. Emergência? Liga <b>112</b>.</span></div>
+      <span>Na descrição, sem matrículas, nomes, telefones nem fotos (RGPD). A posição é arredondada a uns 10 metros. Emergência? Liga <b>112</b>.</span></div>
     <div class="actions">
       <button type="button" class="btn line" id="form-cancel">Cancelar</button>
       <button type="submit" class="btn go" id="save" disabled>Publicar</button>
@@ -302,6 +328,7 @@ textarea{resize:none;min-height:70px}
   <div class="sheet-in">
     <div class="grab"></div>
     <div class="d-head"><span class="ic" id="d-ic"></span><div><strong id="d-title"></strong><span id="d-meta"></span></div></div>
+    <p class="d-by" id="d-by" hidden></p>
     <p class="d-desc" id="d-desc"></p>
     <div class="thanks" id="d-thanks"></div>
     <div class="actions">
@@ -309,11 +336,89 @@ textarea{resize:none;min-height:70px}
       <button type="button" class="btn line" id="d-close">Fechar</button>
     </div>
     <button type="button" class="btn warn" id="d-del" hidden>Apagar o meu reporte</button>
+    <button type="button" class="linkbtn" id="d-flag" hidden>Denunciar este reporte</button>
+    <div class="flagbox" id="d-flagbox" hidden>
+      <p>Porque queres denunciar?</p>
+      <div class="quickwhen">
+        <button type="button" class="qw" data-motivo="Falso ou inventado">Falso ou inventado</button>
+        <button type="button" class="qw" data-motivo="Ofensivo">Ofensivo</button>
+        <button type="button" class="qw" data-motivo="Identifica pessoas">Identifica pessoas</button>
+        <button type="button" class="qw" data-motivo="Spam ou repetido">Spam ou repetido</button>
+      </div>
+    </div>
   </div>
 </section>
 
+<!-- conta -->
+<section class="sheet" id="s-conta" hidden aria-label="A minha conta">
+  <div class="sheet-in">
+    <div class="grab"></div>
+    <h2>A minha conta</h2>
+    <p class="lead" id="c-email"></p>
+    <div class="err" id="c-blocked" hidden>A tua conta foi bloqueada por um administrador. Podes ver o mapa, mas não podes publicar, confirmar nem denunciar.</div>
+    <label class="f" for="c-nome">Nome que aparece nos teus reportes
+      <input class="inp" id="c-nome" maxlength="30" autocomplete="nickname">
+    </label>
+    <div class="err" id="c-err" hidden></div>
+    <div class="actions">
+      <button type="button" class="btn line" id="c-close">Fechar</button>
+      <button type="button" class="btn go" id="c-save">Guardar nome</button>
+    </div>
+    <a class="btn soft" id="c-admin" href="admin.html" hidden style="text-decoration:none">Painel de administração</a>
+    <button type="button" class="btn soft" id="c-out">Terminar sessão</button>
+    <button type="button" class="btn warn" id="c-del">Apagar a minha conta</button>
+    <a class="linkbtn" href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a>
+  </div>
+</section>
+
+<!-- entrada: conta obrigatória -->
+<div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="g-title">
+  <div class="gate-card">
+    <div class="gate-logo"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg>Alerta Portugal</div>
+    <div id="g-login">
+      <h2 id="g-title">Entrar</h2>
+      <p class="lead">Para ver e marcar alertas precisas de uma conta. Cada ponto no mapa mostra o nome de quem o marcou.</p>
+      <button type="button" class="btn soft" id="g-google" hidden><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar com Google</button>
+      <div class="or" id="g-or" hidden>ou com email</div>
+      <label class="f" for="g-email">O teu email
+        <input class="inp" id="g-email" type="email" autocomplete="email" inputmode="email" placeholder="nome@exemplo.pt">
+      </label>
+      <button type="button" class="btn go" id="g-send">Enviar código</button>
+    </div>
+    <div id="g-code" hidden>
+      <h2>Vê o teu email</h2>
+      <p class="lead">Enviámos um código para <b id="g-to"></b>. Escreve-o aqui ou toca no link do email.</p>
+      <input class="inp" id="g-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Código" aria-label="Código do email">
+      <button type="button" class="btn go" id="g-verify">Entrar</button>
+      <button type="button" class="linkbtn" id="g-back">Usar outro email</button>
+    </div>
+    <form id="g-name" hidden novalidate>
+      <h2>Como te chamamos?</h2>
+      <label class="f" for="g-nome">Nome de exibição
+        <input class="inp" id="g-nome" maxlength="30" autocomplete="nickname" placeholder="Ex.: Ana P.">
+      </label>
+      <div class="note"><b>O teu nome fica visível.</b> Aparece junto a cada ponto que marcares e pode ser visto por todas as pessoas com conta na app. Podes usar só o primeiro nome ou uma alcunha. O teu email e telemóvel nunca aparecem. <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>
+      <label class="check"><input type="checkbox" id="g-ok"> Percebi e aceito que este nome apareça nos meus reportes.</label>
+      <button type="submit" class="btn go" id="g-save" disabled>Continuar</button>
+    </form>
+    <div id="g-phone" hidden>
+      <h2>Confirma o teu telemóvel</h2>
+      <p class="lead">Enviamos um SMS com um código. O número serve só para confirmar que és uma pessoa real e não aparece a ninguém.</p>
+      <input class="inp" id="g-tel" type="tel" autocomplete="tel" placeholder="912 345 678" aria-label="Número de telemóvel">
+      <button type="button" class="btn go" id="g-tel-send">Enviar SMS</button>
+      <input class="inp" id="g-sms" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Código do SMS" aria-label="Código do SMS" hidden>
+      <button type="button" class="btn go" id="g-tel-verify" hidden>Confirmar</button>
+    </div>
+    <div class="err" id="g-err" hidden></div>
+    <button type="button" class="linkbtn" id="g-out" hidden>Sair</button>
+    <p class="lead" style="margin:0;font-size:.8rem;color:var(--muted);font-weight:700">Emergência? Liga <b>112</b>.</p>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
@@ -493,13 +598,33 @@ map.on('zoomend',onZoom);
 let reports=[],me=null,db=null,fresh=new Set();const LS='alerta-pt-v1';
 const live=(t,on)=>{for(const k of ['','2']){$('livetxt'+k).textContent=t;$('live'+k).classList.toggle('on',!!on)}};
 function saveLocal(){safe(()=>localStorage.setItem(LS,JSON.stringify(reports)))}
+// Base de dados partilhada (Supabase). Sem config.js preenchido, tudo fica neste aparelho como antes.
+const CFG=window.ALERTA_CONFIG||{};
+const WANT_SB=!!(CFG.supabaseUrl&&CFG.supabaseAnonKey);
+const SB=WANT_SB&&window.supabase?safe(()=>window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}),null):null;
+const NATIVE=!!safe(()=>window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform(),false);
+let perfil=null,defs={},session=null,started=false,chan=null,reloadT=null,pollT=null;
 const store={
-  async add(r){if(db){const ref=await db.collection('ocorrencias').add(r);return ref.id}const id='l'+Date.now();reports.push({...r,id});saveLocal();render();return id},
-  async remove(id){if(db)return db.collection('ocorrencias').doc(id).delete();reports=reports.filter(r=>r.id!==id);saveLocal();render()},
-  async confirm(r){const k=me||'local';if(db)return db.collection('ocorrencias').doc(r.id).update({confirmacoes:{[k]:true}});
-    r.confirmacoes={...(r.confirmacoes||{}),[k]:true};saveLocal();render()}
+  async add(r){
+    if(SB){const {data,error}=await SB.from('reportes').insert({cat:r.cat,lat:r.lat,lng:r.lng,descricao:r.descricao,quando:r.quando}).select('id').single();if(error)throw error;
+      reports.push({...r,id:data.id,autor:me,autorNome:perfil&&perfil.nome,confirmacoes:{}});queueLoad();return data.id}
+    if(db){const ref=await db.collection('ocorrencias').add(r);return ref.id}const id='l'+Date.now();reports.push({...r,id});saveLocal();render();return id},
+  async remove(id){
+    if(SB){const {error}=await SB.from('reportes').delete().eq('id',id);if(error)throw error;reports=reports.filter(r=>r.id!==id);render();return}
+    if(db)return db.collection('ocorrencias').doc(id).delete();reports=reports.filter(r=>r.id!==id);saveLocal();render()},
+  async confirm(r){const k=me||'local';
+    if(SB){const {error}=await SB.from('confirmacoes').insert({reporte_id:r.id});if(error)throw error;r.confirmacoes={...(r.confirmacoes||{}),[k]:true};render();if(current&&current.id===r.id)showDetail(r,true);return}
+    if(db)return db.collection('ocorrencias').doc(r.id).update({confirmacoes:{[k]:true}});
+    r.confirmacoes={...(r.confirmacoes||{}),[k]:true};saveLocal();render()},
+  async flag(r,motivo){const {error}=await SB.from('denuncias').insert({reporte_id:r.id,motivo});if(error)throw error}
 };
 async function connect(){
+  if(WANT_SB){
+    if(!SB){gate('login');gerr('Não foi possível ligar ao servidor. Verifica a internet e recarrega a página.');$('g-send').disabled=true;live('Sem ligação');return}
+    live('A ligar');
+    $('g-google').hidden=$('g-or').hidden=!(CFG.google&&!NATIVE);
+    SB.auth.onAuthStateChange((ev,s)=>{setTimeout(()=>onAuth(ev,s),0)});
+    return}
   let d=null,u=null;
   if(window.claude&&claude.use){[d,u]=await Promise.all([claude.use('db').catch(()=>null),claude.use('user').catch(()=>null)])}
   if(u)me=await Promise.resolve(safe(()=>u.id(),null)).catch(()=>null);
@@ -510,6 +635,97 @@ async function connect(){
     ()=>{clearTimeout(t);live('Erro')});
 }
 
+// ---------- conta: entrada, nome, telemóvel ----------
+function gate(step){
+  $('gate').hidden=!step;
+  for(const k of ['login','code','name','phone'])$('g-'+k).hidden=k!==step;
+  $('g-err').hidden=true;$('g-out').hidden=!(step==='name'||step==='phone');
+}
+function gerr(t){$('g-err').textContent=t;$('g-err').hidden=false}
+function errMsg(e){const m=String((e&&(e.message||e.error_description||e.msg))||'');
+  const lim=m.match(/limite_diario:(\d+)/);
+  if(lim)return `Chegaste ao limite de ${lim[1]} ${lim[1]==='1'?'reporte':'reportes'} por dia. Tenta outra vez amanhã.`;
+  if(/data_invalida/.test(m))return 'A data tem de estar nos últimos 30 dias.';
+  if(/duplicate key/.test(m))return 'Já tinhas feito isto antes.';
+  if(/row-level security|permission denied/.test(m)){
+    if(perfil&&perfil.bloqueado)return 'A tua conta está bloqueada.';
+    if(defs.exigir_telemovel&&!(session&&session.user.phone_confirmed_at))return 'Confirma primeiro o teu telemóvel.';
+    return 'Não tens permissão para fazer isto.'}
+  if(/rate limit|security purposes|too many/i.test(m))return 'Muitos pedidos seguidos. Espera um minuto e tenta outra vez.';
+  if(/expired|invalid|token/i.test(m))return 'Código errado ou expirado. Pede outro.';
+  if(/fetch|network/i.test(m))return 'Sem ligação à internet. Tenta outra vez.';
+  return 'Algo correu mal. Tenta outra vez.'}
+async function busy(btn,fn){btn.disabled=true;try{await fn()}finally{btn.disabled=false}}
+function onAuth(ev,s){
+  if(!s){session=null;me=null;perfil=null;stopLive();reports=[];render();closeAll();$('acct').hidden=true;gate('login');live('Sem sessão');return}
+  const same=session&&session.user.id===s.user.id;session=s;
+  if(same&&started&&ev!=='USER_UPDATED')return;
+  afterLogin();
+}
+async function afterLogin(){
+  me=session.user.id;
+  const [p,d]=await Promise.all([SB.from('perfis').select('*').eq('id',me).maybeSingle(),SB.from('definicoes').select('*').eq('id',1).maybeSingle()]);
+  if(p.error){gate('login');gerr(errMsg(p.error));return}
+  defs=d.data||{};perfil=p.data;
+  if(!perfil){gate('name');const md=session.user.user_metadata||{};$('g-nome').value=String(md.full_name||md.name||'').split(' ')[0].slice(0,30);$('g-ok').checked=false;checkName();return}
+  if(defs.exigir_telemovel&&!session.user.phone_confirmed_at&&!perfil.admin){gate('phone');return}
+  gate(null);$('acct').hidden=false;startLive();
+}
+const cleanName=v=>v.replace(/\s+/g,' ').trim();
+function nameIssue(n){if(n.length<2)return 'O nome precisa de pelo menos 2 letras.';if(/[@<>]|https?:|www\./i.test(n))return 'Usa só um nome, sem emails nem links.';return null}
+function checkName(){const n=cleanName($('g-nome').value);$('g-save').disabled=!!nameIssue(n)||!$('g-ok').checked}
+$('g-nome').oninput=checkName;$('g-ok').onchange=checkName;
+$('g-send').onclick=()=>busy($('g-send'),async()=>{const e=$('g-email').value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return gerr('Escreve um email válido.');
+  const {error}=await SB.auth.signInWithOtp({email:e,options:{shouldCreateUser:true,emailRedirectTo:NATIVE?undefined:location.origin+location.pathname}});
+  if(error)return gerr(errMsg(error));$('g-to').textContent=e;$('g-otp').value='';gate('code');$('g-otp').focus()});
+$('g-email').onkeydown=e=>{if(e.key==='Enter')$('g-send').click()};
+$('g-verify').onclick=()=>busy($('g-verify'),async()=>{const t=$('g-otp').value.replace(/\s/g,'');if(!t)return gerr('Escreve o código que recebeste.');
+  const {error}=await SB.auth.verifyOtp({email:$('g-to').textContent,token:t,type:'email'});if(error)gerr(errMsg(error))});
+$('g-otp').onkeydown=e=>{if(e.key==='Enter')$('g-verify').click()};
+$('g-back').onclick=()=>gate('login');
+$('g-google').onclick=()=>SB.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}}).then(({error})=>{if(error)gerr(errMsg(error))});
+$('g-name').addEventListener('submit',e=>{e.preventDefault();const n=cleanName($('g-nome').value);const issue=nameIssue(n);if(issue)return gerr(issue);
+  busy($('g-save'),async()=>{const {error}=await SB.from('perfis').insert({id:me,nome:n});if(error)return gerr(errMsg(error));await afterLogin()})});
+const e164=t=>{t=t.replace(/[\s.()-]/g,'');if(/^9\d{8}$/.test(t))return '+351'+t;if(/^00\d+$/.test(t))return '+'+t.slice(2);return t};
+$('g-tel-send').onclick=()=>busy($('g-tel-send'),async()=>{const ph=e164($('g-tel').value);if(!/^\+\d{9,15}$/.test(ph))return gerr('Escreve um número válido, por exemplo 912 345 678.');
+  const {error}=await SB.auth.updateUser({phone:ph});if(error)return gerr(errMsg(error));$('g-err').hidden=true;$('g-sms').hidden=$('g-tel-verify').hidden=false;$('g-sms').focus()});
+$('g-tel-verify').onclick=()=>busy($('g-tel-verify'),async()=>{const {data,error}=await SB.auth.verifyOtp({phone:e164($('g-tel').value),token:$('g-sms').value.replace(/\s/g,''),type:'phone_change'});
+  if(error)return gerr(errMsg(error));if(data&&data.user)session={...session,user:data.user};await afterLogin()});
+$('g-out').onclick=()=>SB.auth.signOut();
+
+// ---------- reportes ao vivo ----------
+async function loadReports(){
+  const since=new Date(Date.now()-90*864e5).toISOString();
+  const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,user_id,oculto,perfis(nome),confirmacoes(user_id)').gte('quando',since).order('quando',{ascending:false}).limit(3000);
+  if(error){live('Erro');return}
+  reports=data.filter(x=>!x.oculto||x.user_id===me).map(x=>({id:x.id,cat:x.cat,lat:x.lat,lng:x.lng,descricao:x.descricao,quando:x.quando,autor:x.user_id,
+    autorNome:(x.perfis&&x.perfis.nome)||'Utilizador',oculto:x.oculto,confirmacoes:Object.fromEntries((x.confirmacoes||[]).map(c=>[c.user_id,true]))}));
+  live('Ao vivo',true);render();
+  if(current&&!$('s-detail').hidden){const c=reports.find(r=>r.id===current.id);if(c)showDetail(c,true);else closeAll()}
+}
+const queueLoad=()=>{clearTimeout(reloadT);reloadT=setTimeout(loadReports,500)};
+function startLive(){if(started)return;started=true;loadReports();
+  chan=SB.channel('alerta-reportes')
+    .on('postgres_changes',{event:'*',schema:'public',table:'reportes'},queueLoad)
+    .on('postgres_changes',{event:'*',schema:'public',table:'confirmacoes'},queueLoad).subscribe();
+  pollT=setInterval(()=>{if(!document.hidden)loadReports()},120000)}
+function stopLive(){started=false;clearInterval(pollT);if(chan){SB.removeChannel(chan);chan=null}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&started)queueLoad()});
+
+// ---------- a minha conta ----------
+$('acct').onclick=()=>{closeAll();if(!perfil)return;
+  $('c-email').textContent=session.user.email||session.user.phone||'';$('c-nome').value=perfil.nome;$('c-err').hidden=true;
+  $('c-blocked').hidden=!perfil.bloqueado;$('c-admin').hidden=!perfil.admin;$('c-del').dataset.c='';$('c-del').textContent='Apagar a minha conta';
+  $('s-conta').hidden=false;setUI('sheet')};
+$('c-close').onclick=closeAll;
+$('c-save').onclick=()=>busy($('c-save'),async()=>{const n=cleanName($('c-nome').value);const issue=nameIssue(n);
+  if(issue){$('c-err').textContent=issue;$('c-err').hidden=false;return}
+  const {error}=await SB.from('perfis').update({nome:n}).eq('id',me);if(error){$('c-err').textContent=errMsg(error);$('c-err').hidden=false;return}
+  perfil.nome=n;for(const r of reports)if(r.autor===me)r.autorNome=n;closeAll();render();toast('Nome guardado')});
+$('c-out').onclick=()=>SB.auth.signOut();
+$('c-del').onclick=()=>{const b=$('c-del');if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Toca outra vez: apaga a conta e todos os teus reportes';return}
+  busy(b,async()=>{const {error}=await SB.rpc('apagar_conta');if(error){toast(errMsg(error));return}await SB.auth.signOut();toast('Conta apagada')})};
 
 // ---------- fun ----------
 function confetti(cat){
@@ -551,7 +767,7 @@ function renderList(){
     b.innerHTML=`<span class="ic">${badge(r.cat,34)}</span><span><strong></strong><p></p><small></small></span>`;
     b.querySelector('strong').textContent=CATS[r.cat].label;
     const p=b.querySelector('p');if(r.descricao)p.textContent=r.descricao;else p.remove();
-    b.querySelector('small').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'');
+    b.querySelector('small').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'')+(r.autorNome?' · por '+r.autorNome:'');
     b.onclick=()=>{if(window.innerWidth<760)toggleList(false);map.flyTo([r.lat,r.lng],Math.max(map.getZoom(),13),{duration:.8});showDetail(r,false,true)};
     box.append(b)}
 }
@@ -596,11 +812,11 @@ function setUI(mode){
   $('aim').hidden=$('placebar').hidden=mode!=='aim';
   $('top').style.visibility=mode==='aim'?'hidden':'';
 }
-function closeAll(){['s-cat','s-form','s-detail'].forEach(i=>$(i).hidden=true);draftMarker.remove();current=null;setUI('idle')}
-$('fab').onclick=()=>{closeAll();if(map.getZoom()<12)map.setZoom(12);setUI('aim')};
+function closeAll(){['s-cat','s-form','s-detail','s-conta'].forEach(i=>$(i).hidden=true);$('d-flagbox').hidden=true;draftMarker.remove();current=null;setUI('idle')}
+$('fab').onclick=()=>{closeAll();if(SB&&perfil&&perfil.bloqueado){toast('A tua conta está bloqueada');return}if(map.getZoom()<12)map.setZoom(12);setUI('aim')};
 $('place-cancel').onclick=closeAll;
 $('place-ok').onclick=()=>{const c=map.getCenter();startReport(c)};
-map.on('click',e=>{if(!$('placebar').hidden)return;startReport(e.latlng)});
+map.on('click',e=>{if(!$('placebar').hidden)return;if(SB&&(!perfil||perfil.bloqueado))return;startReport(e.latlng)});
 function startReport(ll){
   closeAll();
   draft={lat:+ll.lat.toFixed(4),lng:+ll.lng.toFixed(4)};
@@ -611,7 +827,7 @@ function startReport(ll){
 $('cat-cancel').onclick=closeAll;$('form-cancel').onclick=closeAll;
 document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{draftCat=b.dataset.cat;
   $('ch-ic').innerHTML=badge(draftCat,36);$('ch-name').textContent=CATS[draftCat].label;
-  $('s-cat').hidden=true;$('s-form').hidden=false;setWhen(0);$('desc').value='';$('count').textContent='0 / 140';validate()});
+  $('s-cat').hidden=true;$('s-form').hidden=false;setWhen(0);$('f-who').hidden=!(SB&&perfil);if(SB&&perfil){$('f-who').textContent='';const wb=document.createElement('b');wb.textContent=perfil.nome;$('f-who').append('Vai aparecer como publicado por ',wb,'.')}$('desc').value='';$('count').textContent='0 / 140';validate()});
 $('ch-change').onclick=()=>{$('s-form').hidden=true;$('s-cat').hidden=false};
 function nowLocal(off){const d=new Date(Date.now()-(off||0)*6e4);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
 function setWhen(min){
@@ -647,7 +863,7 @@ $('s-form').addEventListener('submit',async e=>{
     if(!active[r.cat]){active[r.cat]=true;$('f-'+r.cat).setAttribute('aria-pressed','true')}
     if(+$('period').value===1&&Date.now()-new Date(r.quando)>864e5)$('period').value='7';
     closeAll();render();confetti(r.cat);toast('Obrigado! Já está no mapa')}
-  catch(err){$('err').hidden=false;$('err').textContent='Não deu para publicar. Confirma que tens sessão iniciada e tenta outra vez.';$('save').disabled=false}
+  catch(err){$('err').hidden=false;$('err').textContent=SB?errMsg(err):'Não deu para publicar. Confirma que tens sessão iniciada e tenta outra vez.';$('save').disabled=false}
 });
 
 // ---------- detail ----------
@@ -662,13 +878,22 @@ function showDetail(r,keep,nopan){
   $('d-thanks').innerHTML='';const b=document.createElement('b');b.textContent=conf.length;
   $('d-thanks').append(b,conf.length===1?' pessoa também viu isto':' pessoas também viram isto');
   $('d-confirm').disabled=mine||r.autor===(me||'local');$('d-confirm').textContent=mine?'Já confirmaste':'Também vi isto';
-  $('d-del').hidden=!(r.autor===(me||'local'));
+  const own=r.autor===(me||'local');
+  $('d-del').hidden=!(own||(SB&&perfil&&perfil.admin));$('d-del').dataset.c='';$('d-del').textContent=own?'Apagar o meu reporte':'Apagar (administrador)';
+  $('d-by').hidden=!r.autorNome;$('d-by').textContent='';
+  if(r.autorNome){const nb=document.createElement('b');nb.textContent=r.autorNome;$('d-by').append('Marcado por ',nb,own?' (tu)':'',r.oculto?' · escondido após denúncias, à espera de revisão':'')}
+  $('d-flag').hidden=!(SB&&!own);$('d-flagbox').hidden=true;
   $('s-detail').hidden=false;setUI('sheet');
 }
 $('d-close').onclick=closeAll;
-$('d-confirm').onclick=async()=>{if(!current)return;$('d-confirm').disabled=true;try{await store.confirm(current);toast('Obrigado pela confirmação')}catch(e){$('d-confirm').disabled=false;toast('Não deu para confirmar')}};
+$('d-confirm').onclick=async()=>{if(!current)return;$('d-confirm').disabled=true;try{await store.confirm(current);toast('Obrigado pela confirmação')}catch(e){$('d-confirm').disabled=false;toast(SB?errMsg(e):'Não deu para confirmar')}};
+$('d-flag').onclick=()=>{$('d-flagbox').hidden=!$('d-flagbox').hidden};
+document.querySelectorAll('[data-motivo]').forEach(b=>b.onclick=async()=>{if(!current)return;const r=current;
+  document.querySelectorAll('[data-motivo]').forEach(x=>x.disabled=true);
+  try{await store.flag(r,b.dataset.motivo);$('d-flagbox').hidden=true;$('d-flag').hidden=true;toast('Obrigado. Um administrador vai rever')}
+  catch(e){toast(errMsg(e))}finally{document.querySelectorAll('[data-motivo]').forEach(x=>x.disabled=false)}});
 $('d-del').onclick=async()=>{const b=$('d-del');if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Toca outra vez para apagar';return}
-  b.dataset.c='';b.textContent='Apagar o meu reporte';try{await store.remove(current.id);closeAll();toast('Reporte apagado')}catch(e){toast('Não deu para apagar')}};
+  b.dataset.c='';try{await store.remove(current.id);closeAll();toast('Reporte apagado')}catch(e){toast('Não deu para apagar')}};
 function toast(t){$('toast').textContent=t;$('toast').hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').hidden=true,2600)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.activeElement!==$('q'))closeAll()});
 connect();
