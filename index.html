@@ -1,3 +1,10 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<style>.tiles-dark{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6)}</style>
 <title>Alerta Portugal</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#1b2550">
@@ -348,11 +355,11 @@ let tilesOn=false, geo=null, cities=[];
 const probe=new Image();let decided=false;
 probe.onload=()=>{if(decided)return;decided=true;tilesOn=true;
   const dark=matchMedia('(prefers-color-scheme: dark)').matches&&document.documentElement.dataset.theme!=='light'||document.documentElement.dataset.theme==='dark';
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/'+(dark?'dark_all':'voyager')+'/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>'}).addTo(map);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,className:dark?'tiles-dark':'',attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
   loadGeo(false)};
 probe.onerror=()=>{if(decided)return;decided=true;loadGeo(true)};
 setTimeout(()=>{if(!decided){decided=true;loadGeo(true)}},2500);
-probe.src='https://a.basemaps.cartocdn.com/rastertiles/voyager/7/60/48.png';
+probe.src='https://tile.openstreetmap.org/7/60/48.png';
 
 const lab={t1:L.layerGroup(),t2:L.layerGroup(),t3:L.layerGroup(),fr:L.layerGroup(),dist:L.layerGroup(),sea:L.layerGroup(),shield:L.layerGroup()};
 let lisboaLayer=null,roads=[];
