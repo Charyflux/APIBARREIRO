@@ -4,7 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<style>.tiles-dark{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6)}</style>
+<style>.confetti{position:fixed;inset:0;pointer-events:none;z-index:5000;overflow:hidden}
+.confetti i{position:absolute;top:38%;width:9px;height:14px;animation:conf 1.9s cubic-bezier(.15,.7,.4,1) forwards}
+@keyframes conf{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r));opacity:0}}
+.pin.hot svg{animation:wig 2.4s ease-in-out infinite;transform-origin:50% 100%}
+@keyframes wig{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-8deg) translateY(-3px)}90%{transform:rotate(7deg) translateY(-3px)}95%{transform:rotate(-4deg)}}
+.cl{animation:pop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes pop{0%{transform:scale(.3)}100%{transform:scale(1)}}
+.leaflet-marker-icon:hover .pin svg{transform:scale(1.15) translateY(-3px);transition:transform .15s}
+@media (prefers-reduced-motion: reduce){.pin.hot svg,.cl{animation:none}}
+.tiles-dark{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6)}</style>
 <title>Alerta Portugal</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#1b2550">
@@ -303,6 +312,9 @@ textarea{resize:none;min-height:70px}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
 <script>
 (function(){
 const $=id=>document.getElementById(id);
@@ -342,7 +354,7 @@ paintIcons();
 
 // ---------- map ----------
 const PT=[[36.9,-9.6],[42.2,-6.1]];
-const map=L.map('map',{zoomControl:false,minZoom:5,maxZoom:17,zoomSnap:.5,worldCopyJump:false,maxBounds:[[29,-34],[46,0]]});
+const map=L.map('map',{zoomControl:false,minZoom:5,maxZoom:18,zoomSnap:.5,worldCopyJump:false,maxBounds:[[29,-34],[46,0]]});
 const wide=()=>window.innerWidth>=760;const fitPT=()=>map.fitBounds(PT,wide()?{paddingTopLeft:[390,20],paddingBottomRight:[90,20]}:{padding:[10,10]});fitPT();
 map.attributionControl.setPrefix(false);
 $('zin').onclick=()=>map.zoomIn();$('zout').onclick=()=>map.zoomOut();
@@ -352,14 +364,48 @@ $('home').onclick=fitPT;
 map.getPane('labels').style.zIndex=450;
 
 let tilesOn=false, geo=null, cities=[];
-const probe=new Image();let decided=false;
-probe.onload=()=>{if(decided)return;decided=true;tilesOn=true;
-  const dark=matchMedia('(prefers-color-scheme: dark)').matches&&document.documentElement.dataset.theme!=='light'||document.documentElement.dataset.theme==='dark';
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,className:dark?'tiles-dark':'',attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
-  loadGeo(false)};
-probe.onerror=()=>{if(decided)return;decided=true;loadGeo(true)};
-setTimeout(()=>{if(!decided){decided=true;loadGeo(true)}},2500);
-probe.src='https://tile.openstreetmap.org/7/60/48.png';
+const isDark=()=>matchMedia('(prefers-color-scheme: dark)').matches&&document.documentElement.dataset.theme!=='light'||document.documentElement.dataset.theme==='dark';
+const OSM_ATTR='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+let decided=false;
+function useRaster(){
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,className:isDark()?'tiles-dark':'',attribution:OSM_ATTR}).addTo(map)}
+// Waze-like palette for the vector map (OpenFreeMap, no key needed)
+const PAL={light:{bg:'#f4f1e8',water:'#8fd3ff',park:'#b9eca0',wood:'#a5e08c',bldg:'#e9e3f7',bldgLine:'#d6cdee',
+    mw:'#ff9a3c',mwC:'#d4691a',pri:'#ffc94a',priC:'#d9a441',sec:'#fff1a0',secC:'#d8c977',min:'#ffffff',minC:'#c7c3d8',rail:'#b9b2cc'},
+  dark:{bg:'#1b2550',water:'#0e4f7a',park:'#1f5a45',wood:'#1c513f',bldg:'#2b3666',bldgLine:'#38427a',
+    mw:'#ff9a3c',mwC:'#7a3d0f',pri:'#ffc94a',priC:'#7a5a12',sec:'#8a96d6',secC:'#26306a',min:'#4a5590',minC:'#1d2547',rail:'#55609a'}};
+function recolor(style,P){
+  for(const l of style.layers){const id=l.id,t=l.type;l.paint=l.paint||{};
+    const cas=/casing|outline/.test(id);
+    const set=(k,v)=>{l.paint[k]=v};
+    if(t==='background')set('background-color',P.bg);
+    else if(t==='fill'&&/water/.test(id))set('fill-color',P.water);
+    else if(t==='line'&&/waterway|water/.test(id))set('line-color',P.water);
+    else if(t==='fill'&&/park|grass|garden|pitch|cemetery|landuse_?green/.test(id))set('fill-color',P.park);
+    else if(t==='fill'&&/wood|forest|landcover/.test(id)){set('fill-color',P.wood);set('fill-opacity',.55)}
+    else if(t==='fill'&&/building/.test(id)){set('fill-color',P.bldg);set('fill-outline-color',P.bldgLine)}
+    else if(t==='fill-extrusion'){set('fill-extrusion-color',P.bldg)}
+    else if(t==='line'&&/rail|transit/.test(id)&&!/casing/.test(id))set('line-color',P.rail);
+    else if(t==='line'&&/road|bridge|tunnel|highway/.test(id)&&!/path|pedestrian|footway|cycle|steps|track|area|label|shield/.test(id)){
+      const k=/motorway/.test(id)?'mw':/trunk|primary/.test(id)?'pri':/secondary|tertiary/.test(id)?'sec':'min';
+      set('line-color',cas?P[k+'C']:P[k])}
+    else if(t==='symbol'&&/road|highway|street/.test(id)&&l.layout&&l.layout['text-field']){
+      set('text-color',isDark()?'#eef1ff':'#2b2440');set('text-halo-color',isDark()?'#1b2550':'#ffffff');set('text-halo-width',1.6)}
+  }
+  return style}
+function useVector(){
+  if(!window.maplibregl||!L.maplibreGL)return false;
+  if(!safe(()=>{const c=document.createElement('canvas');return !!(c.getContext('webgl2')||c.getContext('webgl'))},false))return false;
+  const dark=isDark();
+  fetch('https://tiles.openfreemap.org/styles/'+(dark?'dark':'liberty')).then(r=>{if(!r.ok)throw 0;return r.json()}).then(st=>{
+    if(decided)return;decided=true;tilesOn=true;
+    const gl=L.maplibreGL({style:recolor(st,dark?PAL.dark:PAL.light),attribution:'<a href="https://openfreemap.org">OpenFreeMap</a> '+OSM_ATTR}).addTo(map);
+    safe(()=>gl.getMaplibreMap().on('error',()=>{}));
+    loadGeo(false)
+  }).catch(()=>{if(decided)return;decided=true;tilesOn=true;useRaster();loadGeo(false)});
+  return true}
+if(!useVector()){decided=true;tilesOn=true;useRaster();loadGeo(false)}
+setTimeout(()=>{if(!decided){decided=true;loadGeo(true)}},6000);
 
 const lab={t1:L.layerGroup(),t2:L.layerGroup(),t3:L.layerGroup(),fr:L.layerGroup(),dist:L.layerGroup(),sea:L.layerGroup(),shield:L.layerGroup()};
 let lisboaLayer=null,roads=[];
@@ -424,6 +470,16 @@ async function connect(){
     ()=>{clearTimeout(t);live('Erro')});
 }
 
+
+// ---------- fun ----------
+function confetti(cat){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const cols=[css(CATS[cat]?.c||'--viol'),'#ffc94a','#33ccff','#7ed957','#ff6fb5'];
+  const box=document.createElement('div');box.className='confetti';document.body.append(box);
+  for(let i=0;i<70;i++){const e=document.createElement('i');
+    e.style.cssText=`left:${50+(Math.random()-.5)*30}%;background:${cols[i%cols.length]};--dx:${(Math.random()-.5)*120}vw;--dy:${40+Math.random()*70}vh;--r:${Math.random()*900-450}deg;animation-delay:${Math.random()*.15}s;border-radius:${Math.random()<.4?'50%':'2px'}`;
+    box.append(e)}
+  setTimeout(()=>box.remove(),2200)}
 // ---------- markers ----------
 const cluster=L.markerClusterGroup({showCoverageOnHover:false,maxClusterRadius:48,spiderfyOnMaxZoom:true,
   iconCreateFunction(c){const ms=c.getAllChildMarkers();const v=ms.filter(m=>m.options.cat==='violencia').length,n=ms.length;
@@ -550,7 +606,7 @@ $('s-form').addEventListener('submit',async e=>{
   try{const id=await store.add(r);fresh.add(id);
     if(!active[r.cat]){active[r.cat]=true;$('f-'+r.cat).setAttribute('aria-pressed','true')}
     if(+$('period').value===1&&Date.now()-new Date(r.quando)>864e5)$('period').value='7';
-    closeAll();render();toast('Obrigado! Já está no mapa')}
+    closeAll();render();confetti(r.cat);toast('Obrigado! Já está no mapa')}
   catch(err){$('err').hidden=false;$('err').textContent='Não deu para publicar. Confirma que tens sessão iniciada e tenta outra vez.';$('save').disabled=false}
 });
 
