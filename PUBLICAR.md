@@ -5,10 +5,27 @@ Quando mudas o site, a app muda também na próxima compilação.
 
 | Plataforma | Onde fica | O que precisas |
 |---|---|---|
-| Web | https://charyflux.github.io/APIBARREIRO/ (GitHub Pages) | Nada. Também se instala no telemóvel com "Adicionar ao ecrã inicial". |
+| Web | https://streetalert.online (GitHub Pages, domínio próprio) | Nada. Também se instala no telemóvel com "Adicionar ao ecrã inicial". |
 | Android (APK de teste) | GitHub > Actions > "Android (APK e AAB)" > Artifacts | Nada. Compila sozinho a cada alteração. |
 | Android (Google Play) | Ficheiro `.aab` assinado no mesmo sítio | Conta Google Play Console (25 USD, pagamento único) e uma chave de assinatura. |
 | iOS (IPA, App Store) | GitHub > Actions > "iOS (IPA)" > Run workflow | Conta Apple Developer (99 USD/ano), certificado e perfil de distribuição. |
+
+## Domínio streetalert.online
+
+O site está em **https://streetalert.online**. O ficheiro `CNAME` na raiz diz ao GitHub Pages para usar este domínio, e o endereço antigo (`charyflux.github.io/APIBARREIRO`) passa a redirecionar para ele.
+
+### DNS na GoDaddy (só uma vez)
+Em GoDaddy > **Os meus produtos** > streetalert.online > **DNS** > **Gerir DNS**:
+1. Apaga os registos do tipo **A** com nome `@` que já lá estejam (por exemplo "Parked" ou "WebsiteBuilder") e o **CNAME** `www`, se existir.
+2. Cria quatro registos **A**, todos com Nome `@`:
+   `185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`
+3. Cria um registo **CNAME** com Nome `www` e Valor `charyflux.github.io`
+4. Se a GoDaddy tiver "Encaminhamento de domínio" (Forwarding) ativo, desliga-o.
+
+A propagação demora entre alguns minutos e algumas horas.
+
+### No GitHub (depois dos DNS)
+Em **Settings > Pages** confirma que *Custom domain* mostra `streetalert.online` com "DNS check successful" e marca **Enforce HTTPS** (fica disponível quando o certificado estiver pronto, normalmente menos de uma hora).
 
 ## Contas e base de dados partilhada (Supabase)
 
@@ -21,8 +38,8 @@ A app já tem entrada com conta (email ou Google), nome visível em cada reporte
 1. **Criar o projeto.** Em [supabase.com](https://supabase.com) cria uma conta e um projeto novo. Em *Region* escolhe **Central EU (Frankfurt)** (fica na UE, por causa do RGPD). Guarda a password da base de dados.
 2. **Criar as tabelas e as regras.** No projeto, abre **SQL Editor > New query**, cola o ficheiro [`supabase/schema.sql`](supabase/schema.sql) inteiro e carrega em **Run**. Pode correr-se outra vez sem problema.
 3. **Endereços autorizados.** Em **Authentication > URL Configuration**:
-   - *Site URL*: `https://charyflux.github.io/APIBARREIRO/`
-   - *Redirect URLs*: adiciona `https://charyflux.github.io/APIBARREIRO/**`
+   - *Site URL*: `https://streetalert.online/`
+   - *Redirect URLs*: adiciona `https://streetalert.online/**` e `https://www.streetalert.online/**`
 4. **Código no email.** Em **Authentication > Emails > Templates > Magic Link**, troca o texto por algo assim (o importante é o `{{ .Token }}`, que é o código que a pessoa escreve na app):
    ```html
    <h2>O teu código do Alerta Portugal</h2>
@@ -38,7 +55,7 @@ A app já tem entrada com conta (email ou Google), nome visível em cada reporte
    update public.perfis set admin = true
    where id = (select id from auth.users where email = 'o-teu-email@exemplo.pt');
    ```
-   Na app, em **A minha conta** (botão redondo com uma pessoa), aparece **Painel de administração**. Também podes abrir `https://charyflux.github.io/APIBARREIRO/admin.html`.
+   Na app, em **A minha conta** (botão redondo com uma pessoa), aparece **Painel de administração**. Também podes abrir `https://streetalert.online/admin.html`.
 8. **Política de privacidade.** Preenche os campos entre `[ ]` em `privacidade.html` (o teu nome, email de contacto e a região do Supabase).
 
 ### Opcional: entrar com Google
