@@ -396,7 +396,43 @@ function recolor(style,P){
     else if(t==='symbol'&&/road|highway|street/.test(id)&&l.layout&&l.layout['text-field']){
       set('text-color',isDark()?'#eef1ff':'#2b2440');set('text-halo-color',isDark()?'#1b2550':'#ffffff');set('text-halo-width',1.6)}
   }
+  addRefs(style);
   return style}
+// Pontos de referência: esquadras, hospitais, escolas, praças, estações, etc. (dados OSM via OpenFreeMap)
+const REF=[
+  ['police','#2f6bff',12],['fire_station','#e5484d',13],['hospital','#e5484d',12],['pharmacy','#16a34a',15],
+  ['town_hall','#7c3aed',13],['school','#f59e0b',14],['college','#f59e0b',14],['railway','#334155',13],
+  ['bus','#0ea5e9',16],['place_of_worship','#8b5e34',15],['park','#22a35a',14],['square','#a855f7',14],
+  ['post','#eab308',15],['library','#7c3aed',15],['museum','#7c3aed',14],['stadium','#22a35a',14],
+  ['shop','#64748b',17],['fuel','#64748b',15],['parking','#2563eb',16]];
+function addRefs(style){
+  const src=Object.keys(style.sources||{}).find(k=>style.sources[k].type==='vector');if(!src)return;
+  const font=(style.layers.find(l=>l.layout&&l.layout['text-font'])||{layout:{'text-font':['Noto Sans Regular']}}).layout['text-font'];
+  const bold=font.map(f=>f.replace(/Regular|Italic/,'Bold'));
+  const dark=isDark(),cls=['coalesce',['get','subclass'],['get','class']];
+  const color=['match',cls];const prio=['match',cls];const minz=['match',cls];
+  REF.forEach(([c,col,z],i)=>{color.push(c,col);prio.push(c,i);minz.push(c,z)});
+  color.push('#64748b');prio.push(99);minz.push(18);
+  const isRef=['any',['in',['get','class'],['literal',REF.map(r=>r[0])]],['in',['get','subclass'],['literal',REF.map(r=>r[0])]]];
+  const show=['all',isRef,['>=',['zoom'],minz]];
+  const name=['coalesce',['get','name:pt'],['get','name'],['get','name:latin']];
+  // esconder POIs originais do estilo para não duplicar
+  for(const l of style.layers)if(/^poi/.test(l.id)&&l.type==='symbol'){l.layout=l.layout||{};l.layout.visibility='none'}
+  style.layers.push(
+    {id:'ref-dot',type:'circle',source:src,'source-layer':'poi',minzoom:12,filter:show,
+     paint:{'circle-color':color,'circle-radius':['interpolate',['linear'],['zoom'],12,4,16,7],'circle-stroke-color':'#ffffff','circle-stroke-width':2}},
+    {id:'ref-label',type:'symbol',source:src,'source-layer':'poi',minzoom:12,filter:['all',show,['has','name']],
+     layout:{'text-field':name,'text-font':bold,'text-size':['interpolate',['linear'],['zoom'],12,11,17,13.5],
+       'text-variable-anchor':['left','right','top','bottom'],'text-radial-offset':.8,'text-justify':'auto',
+       'text-max-width':9,'symbol-sort-key':prio,'text-optional':true},
+     paint:{'text-color':color,'text-halo-color':dark?'#1b2550':'#ffffff','text-halo-width':1.8}},
+    // nomes de praças e largos que vêm como áreas pedonais ou ruas
+    {id:'ref-square',type:'symbol',source:src,'source-layer':'transportation_name',minzoom:14,
+     filter:['all',['has','name'],['any',['==',['get','class'],'pedestrian'],['>=',['index-of','Praça',['to-string',['get','name']]],0],['>=',['index-of','Largo',['to-string',['get','name']]],0],['>=',['index-of','Rossio',['to-string',['get','name']]],0]]],
+     layout:{'text-field':name,'text-font':bold,'text-size':13,'symbol-placement':'point','text-max-width':8},
+     paint:{'text-color':dark?'#e9d5ff':'#7e22ce','text-halo-color':dark?'#1b2550':'#ffffff','text-halo-width':2}}
+  );
+}
 function useVector(){
   if(!window.maplibregl||!L.maplibreGL)return false;
   if(!safe(()=>{const c=document.createElement('canvas');return !!(c.getContext('webgl2')||c.getContext('webgl'))},false))return false;
