@@ -174,6 +174,9 @@ textarea{resize:none;min-height:70px}
 .gdpr{display:flex;gap:10px;font:700 .78rem var(--font);line-height:1.45;color:var(--muted);background:var(--card-2);border-radius:16px;padding:12px}
 .gdpr svg{flex:none;color:var(--ok)}
 .actions{display:flex;gap:10px}
+.me-dot{width:18px;height:18px;border-radius:50%;background:#2f7bff;border:3px solid #fff;box-shadow:0 0 0 2px rgba(47,123,255,.35),0 2px 6px rgba(0,0,0,.35);box-sizing:border-box}
+@media (prefers-reduced-motion:no-preference){.me-dot{animation:mepulse 2s ease-out infinite}@keyframes mepulse{0%{box-shadow:0 0 0 0 rgba(47,123,255,.55),0 2px 6px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 16px rgba(47,123,255,0),0 2px 6px rgba(0,0,0,.35)}}}
+#locate.busy svg{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
 /* conta, entrada e denúncias */
 .inp{font:700 1rem var(--font);color:var(--fg);background:var(--card-2);border:2px solid transparent;border-radius:16px;padding:12px 14px;width:100%;box-sizing:border-box}
 .inp:focus{outline:none;border-color:var(--park)}
@@ -264,6 +267,7 @@ textarea{resize:none;min-height:70px}
   <span class="gap"></span>
   <button class="round" id="zin" aria-label="Aproximar">+</button>
   <button class="round" id="zout" aria-label="Afastar">−</button>
+  <button class="round" id="locate" aria-label="Centrar em mim" title="Centrar em mim"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg></button>
   <button class="round" id="home" aria-label="Ver Portugal inteiro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M12 2 4 21l8-4 8 4z"/></svg></button>
   <button class="round" id="acct" aria-label="A minha conta" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
 </div>
@@ -468,6 +472,24 @@ const wide=()=>window.innerWidth>=760;const fitPT=()=>map.fitBounds(PT,wide()?{p
 map.attributionControl.setPrefix(false);
 $('zin').onclick=()=>map.zoomIn();$('zout').onclick=()=>map.zoomOut();
 $('home').onclick=fitPT;
+// ---------- a minha localização (só neste aparelho, nunca é enviada) ----------
+let meDot=null,meAcc=null;
+function locateMe(manual){
+  if(!('geolocation' in navigator)){if(manual)toast('Este aparelho não consegue indicar a localização');return}
+  $('locate').classList.add('busy');
+  navigator.geolocation.getCurrentPosition(p=>{$('locate').classList.remove('busy');
+    const ll=[p.coords.latitude,p.coords.longitude];
+    if(!L.latLngBounds([[29,-34],[46,0]]).contains(ll)){if(manual)toast('Pareces estar fora de Portugal');return}
+    if(!meDot){meAcc=L.circle(ll,{radius:p.coords.accuracy,interactive:false,color:'#2f7bff',weight:1,opacity:.4,fillOpacity:.1}).addTo(map);
+      meDot=L.marker(ll,{interactive:false,keyboard:false,zIndexOffset:-100,icon:L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map)}
+    else{meDot.setLatLng(ll);meAcc.setLatLng(ll).setRadius(p.coords.accuracy)}
+    if($('placebar').hidden)map.flyTo(ll,Math.max(map.getZoom(),15),{duration:manual?.8:1.2});else map.setView(ll,Math.max(map.getZoom(),16));
+  },e=>{$('locate').classList.remove('busy');
+    toast(e.code===1?'Sem permissão para a localização. Podes procurar a tua cidade.':'Não foi possível saber onde estás. Podes procurar a tua cidade.')},
+  {enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+}
+$('locate').onclick=()=>locateMe(true);
+setTimeout(()=>locateMe(false),600);
 
 ['base','roads','labels'].forEach((n,i)=>{const p=map.createPane(n);p.style.zIndex=300+i*20;p.style.pointerEvents='none'});
 map.getPane('labels').style.zIndex=450;
