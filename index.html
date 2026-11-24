@@ -540,11 +540,26 @@ paintIcons();
 
 // ---------- map ----------
 const PT=[[36.9,-9.6],[42.2,-6.1]];
-const map=L.map('map',{zoomControl:false,minZoom:5,maxZoom:18,zoomSnap:.5,worldCopyJump:false,maxBounds:[[29,-34],[46,0]]});
-const wide=()=>window.innerWidth>=760;const fitPT=()=>map.fitBounds(PT,wide()?{paddingTopLeft:[390,20],paddingBottomRight:[90,20]}:{padding:[10,10]});fitPT();
+const map=L.map('map',{zoomControl:false,minZoom:6,maxZoom:18,zoomSnap:.25,worldCopyJump:false,maxBounds:[[27,-35],[46,1]],maxBoundsViscosity:.8});
+const wide=()=>window.innerWidth>=760;
+// Vista inicial: Portugal continental centrado no espaço livre do ecrã (descontando o painel e os botões).
+function ptPadding(){
+  const top=$('top').getBoundingClientRect(),ctr=$('ctrls').getBoundingClientRect(),W=window.innerWidth;
+  const right=ctr.width?Math.max(16,W-ctr.left+12):16;
+  if(wide())return {paddingTopLeft:[Math.round(top.right+24),24],paddingBottomRight:[Math.round(right),24]};
+  return {paddingTopLeft:[12,Math.round(top.bottom+8)],paddingBottomRight:[Math.round(right),16]};
+}
+const fitPT=(anim)=>{map.invalidateSize(false);map.fitBounds(PT,{...ptPadding(),maxZoom:9,animate:!!anim})};
+let autoView=true; // passa a falso quando a pessoa mexe no mapa ou é localizada
+['pointerdown','wheel','touchstart','keydown'].forEach(ev=>$('map').addEventListener(ev,()=>{autoView=false},{passive:true}));
+const refit=()=>{if(autoView)fitPT(false)};
+fitPT(false);
+window.addEventListener('load',refit);
+let rsT;window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(()=>{map.invalidateSize();refit()},150)});
+if(window.ResizeObserver)new ResizeObserver(()=>{clearTimeout(rsT);rsT=setTimeout(()=>{map.invalidateSize();refit()},150)}).observe($('map'));
 map.attributionControl.setPrefix(false);
 $('zin').onclick=()=>map.zoomIn();$('zout').onclick=()=>map.zoomOut();
-$('home').onclick=fitPT;
+$('home').onclick=()=>fitPT(true);
 // ---------- a minha localização (fica só neste aparelho, nunca é enviada) ----------
 const store2={get:k=>safe(()=>localStorage.getItem(k),null),set:(k,v)=>safe(()=>localStorage.setItem(k,v))};
 const K_TUT='ap-tutorial-v1',K_LOC='ap-loc-v1',K_LAST='ap-last-pos-v1';
@@ -553,7 +568,7 @@ const STREET=17;
 let meDot=null,meAcc=null,watchId=null,watchStop=null,slowT=null,gotFix=false;
 // Abrir logo perto do último sítio conhecido (guardado só neste aparelho), enquanto o GPS responde.
 (()=>{const l=safe(()=>JSON.parse(store2.get(K_LAST)||'null'),null);
-  if(l&&PT_BOX.contains([l.lat,l.lng])&&store2.get(K_LOC)==='yes')map.setView([l.lat,l.lng],15,{animate:false})})();
+  if(l&&PT_BOX.contains([l.lat,l.lng])&&store2.get(K_LOC)==='yes'){autoView=false;map.setView([l.lat,l.lng],15,{animate:false})}})();
 function drawMe(ll,acc){
   if(!meDot){meAcc=L.circle(ll,{radius:acc,interactive:false,color:'#2f7bff',weight:1,opacity:.4,fillOpacity:.1}).addTo(map);
     meDot=L.marker(ll,{interactive:false,keyboard:false,zIndexOffset:-100,icon:L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map)}
@@ -580,7 +595,7 @@ function locateMe(manual){
     if(!PT_BOX.contains(ll)){stopWatch();if(manual||!gotFix)toast('Pareces estar fora de Portugal. O mapa fica em Portugal.');gotFix=true;return}
     const first=!gotFix;gotFix=true;store2.set(K_LOC,'yes');store2.set(K_LAST,JSON.stringify({lat:+ll[0].toFixed(3),lng:+ll[1].toFixed(3)}));
     drawMe(ll,acc);
-    if(first){clearTimeout(slowT);$('locate').classList.remove('busy');
+    if(first){autoView=false;clearTimeout(slowT);$('locate').classList.remove('busy');
       if($('placebar').hidden)map.flyTo(ll,Math.max(map.getZoom(),STREET),{duration:1});else map.setView(ll,Math.max(map.getZoom(),STREET))}
     if(acc<=30)stopWatch()};
   const bad=e=>{if(gotFix)return;stopWatch();
@@ -947,7 +962,7 @@ function showResults(){
   box.querySelectorAll('button[data-i]').forEach(b=>b.firstChild.textContent=hits[+b.dataset.i].n);
   box.hidden=false;
 }
-const GO={pt:fitPT,ma:()=>map.flyTo([32.75,-16.95],10),az:()=>map.flyToBounds([[36.9,-31.3],[39.8,-25]]),lx:()=>map.flyTo([38.722,-9.14],13),po:()=>map.flyTo([41.155,-8.62],13)};
+const GO={pt:()=>fitPT(true),ma:()=>map.flyTo([32.75,-16.95],10),az:()=>map.flyToBounds([[36.9,-31.3],[39.8,-25]]),lx:()=>map.flyTo([38.722,-9.14],13),po:()=>map.flyTo([41.155,-8.62],13)};
 function goCity(c){map.flyTo([c.lat,c.lng],c.t===1?12:12.5,{duration:1});$('q').value='';$('results').hidden=true;$('q').blur()}
 $('q').addEventListener('focus',showResults);
 $('q').addEventListener('input',()=>{sel=-1;showResults()});
