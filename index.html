@@ -125,7 +125,8 @@ button{font-family:var(--font)}
 .pill select:focus{outline:none}
 
 /* right controls */
-.ctrls{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));z-index:700;display:flex;flex-direction:column;align-items:center;gap:12px}
+.ctrls{position:absolute;right:max(14px,env(safe-area-inset-right,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));z-index:700;display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:none}
+.ctrls>*{pointer-events:auto}
 .ctrls .gap{height:4px}
 .round{width:48px;height:48px;border-radius:50%;border:0;background:var(--card);color:var(--fg);box-shadow:var(--shadow);display:grid;place-items:center;cursor:pointer;font:900 1.4rem var(--font);transition:transform .15s}
 .round:active{transform:scale(.9)}
@@ -1026,6 +1027,7 @@ function needAccount(p){
 async function runPending(){const p=pend.get();if(!p)return;pend.set(null);
   if(accountStep())return;
   if(WANT_SB&&perfil.bloqueado){toast(t('A tua conta está bloqueada'));return}
+  if(p.type==='report'&&p.lat!=null){closeAll();startReport(L.latLng(p.lat,p.lng));return}
   if(p.type==='aim'){closeAll();if(p.lat!=null)map.setView([p.lat,p.lng],Math.max(p.z||12,12),{animate:false});else if(map.getZoom()<12)map.setZoom(12);setUI('aim')}
   else if(p.type==='confirm'||p.type==='flag'){const r=reports.find(x=>x.id===p.id);if(!r)return;
     if(!current||current.id!==r.id||$('s-detail').hidden)showDetail(r,false,true);
@@ -1368,7 +1370,19 @@ function closeAll(){['s-cat','s-form','s-detail','s-conta'].forEach(i=>$(i).hidd
 $('fab').onclick=()=>{closeAll();const c=map.getCenter();if(!needAccount({type:'aim',lat:c.lat,lng:c.lng,z:map.getZoom()}))return;if(map.getZoom()<12)map.setZoom(12);setUI('aim')};
 $('place-cancel').onclick=closeAll;
 $('place-ok').onclick=()=>{const c=map.getCenter();startReport(c)};
-map.on('click',e=>{if(!$('placebar').hidden)return;if(WANT_SB&&!SB)return;if(accountStep()||(WANT_SB&&perfil.bloqueado))return;startReport(e.latlng)}); // sem conta, tocar no mapa não abre nada
+// Tocar no mapa marca um alerta nesse ponto. Sem sessão, abre o ecrã de entrada e, depois de entrar,
+// continua o reporte no mesmo ponto. Arrastar não conta como toque (o Leaflet não dispara "click"),
+// e um duplo toque para aproximar cancela o toque simples.
+let mapTapT=null;
+map.on('dblclick zoomstart movestart',()=>{clearTimeout(mapTapT);mapTapT=null});
+map.on('click',e=>{if(!$('placebar').hidden||!$('gate').hidden)return;if(WANT_SB&&!SB)return;
+  clearTimeout(mapTapT);const ll=e.latlng;
+  mapTapT=setTimeout(()=>{mapTapT=null;
+    if(WANT_SB&&session&&!profChecked)return;
+    if(WANT_SB&&perfil&&perfil.bloqueado&&!accountStep()){toast(t('A tua conta está bloqueada'));return}
+    if(accountStep()){if(!$('s-detail').hidden||!$('s-conta').hidden||!$('s-cat').hidden||!$('s-form').hidden){closeAll();return}
+      closeAll();needAccount({type:'report',lat:+ll.lat.toFixed(5),lng:+ll.lng.toFixed(5)});return}
+    startReport(ll)},280)});
 function startReport(ll){
   closeAll();
   draft={lat:+ll.lat.toFixed(4),lng:+ll.lng.toFixed(4)};
