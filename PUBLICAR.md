@@ -31,12 +31,12 @@ Em **Settings > Pages** confirma que *Custom domain* mostra `streetalert.online`
 
 A app já tem entrada com conta (email ou Google), nome visível em cada reporte, denúncias, bloqueio de contas, limite diário para contas novas e um painel de administração (`admin.html`). Tudo isto usa o [Supabase](https://supabase.com), que é gratuito para começar.
 
-**Enquanto `config.js` estiver vazio, o site continua a funcionar como antes** (alertas só no aparelho, sem conta). Assim que preencheres `config.js`, a conta passa a ser obrigatória.
+**Enquanto `config.js` estiver vazio, o site continua a funcionar como antes** (alertas só no aparelho, sem conta). Assim que preencheres `config.js`, qualquer pessoa vê o mapa e os reportes sem conta, e a conta passa a ser pedida só para publicar, confirmar ou denunciar.
 
 ### Passos que só tu podes fazer
 
 1. **Criar o projeto.** Em [supabase.com](https://supabase.com) cria uma conta e um projeto novo. Em *Region* escolhe **Central EU (Frankfurt)** (fica na UE, por causa do RGPD). Guarda a password da base de dados.
-2. **Criar as tabelas e as regras.** No projeto, abre **SQL Editor > New query**, cola o ficheiro [`supabase/schema.sql`](supabase/schema.sql) inteiro e carrega em **Run**. Pode correr-se outra vez sem problema.
+2. **Criar as tabelas e as regras.** No projeto, abre **SQL Editor > New query**, cola o ficheiro [`supabase/schema.sql`](supabase/schema.sql) inteiro e carrega em **Run**. Pode correr-se outra vez sem problema. **Sempre que o `schema.sql` mudar, volta a corrê-lo** (por exemplo, a mudança que abriu a leitura do mapa a quem não tem conta).
 3. **Endereços autorizados.** Em **Authentication > URL Configuration**:
    - *Site URL*: `https://streetalert.online/`
    - *Redirect URLs*: adiciona `https://streetalert.online/**` e `https://www.streetalert.online/**`
@@ -73,8 +73,9 @@ O SMS tem custo por mensagem (cobrado pelo fornecedor de SMS, não pelo Supabase
 3. No **Painel de administração > Definições**, liga **Exigir telemóvel confirmado por SMS**. A partir daí, quem não confirmou o número vê o mapa mas não consegue publicar, confirmar nem denunciar.
 
 ### Regras que já estão ativas
-- Sem sessão iniciada não se vê nenhum reporte.
-- Cada reporte mostra **"Marcado por <nome>"**. O email e o telemóvel nunca aparecem.
+- Sem sessão vê-se o mapa, os reportes visíveis, as confirmações e o nome de exibição de quem publicou. Mais nada: nem emails, nem telemóveis, nem denúncias, nem definições.
+- Publicar, confirmar e denunciar exige sessão, nome de exibição e conta não bloqueada. Isto é garantido pelas regras da base de dados (RLS), não só pelo ecrã.
+- Cada reporte mostra **"Publicado por <nome>"**. O email e o telemóvel nunca aparecem.
 - Contas com menos de 7 dias: até 3 reportes por dia. Restantes: até 20. Ajustável no painel.
 - Um reporte com 3 denúncias fica escondido até um administrador o rever (aprovar ou apagar).
 - Contas bloqueadas continuam a ver o mapa mas não publicam, confirmam nem denunciam.

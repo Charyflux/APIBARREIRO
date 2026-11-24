@@ -148,9 +148,14 @@ alter table public.reportes enable row level security;
 alter table public.confirmacoes enable row level security;
 alter table public.denuncias enable row level security;
 
--- Quem não tem sessão não vê nada.
+-- Quem não tem sessão (anon) só pode LER o mapa: reportes visíveis, confirmações e o nome de exibição.
+-- Não vê emails, telemóveis, denúncias, definições, nem se uma conta é admin ou está bloqueada.
+-- Publicar, confirmar e denunciar exige sessão (authenticated) e conta não bloqueada.
 revoke all on public.definicoes, public.perfis, public.reportes, public.confirmacoes, public.denuncias from anon;
 revoke all on public.definicoes, public.perfis, public.reportes, public.confirmacoes, public.denuncias from authenticated;
+grant select (id, nome) on public.perfis to anon;
+grant select (id, user_id, cat, lat, lng, descricao, quando, criado, oculto) on public.reportes to anon;
+grant select (reporte_id, user_id) on public.confirmacoes to anon;
 grant select, update on public.definicoes to authenticated;
 grant select, insert, delete on public.perfis to authenticated;
 grant update (nome) on public.perfis to authenticated;           -- só o nome; admin/bloqueado mudam por função
@@ -158,7 +163,7 @@ grant select, insert, delete on public.reportes to authenticated; -- sem update:
 grant select, insert, delete on public.confirmacoes to authenticated;
 grant select, insert, delete on public.denuncias to authenticated;
 
-revoke execute on function public.admin_bloquear(uuid, boolean, boolean), public.admin_aprovar(uuid), public.apagar_conta() from public, anon;
+revoke execute on function public.admin_bloquear(uuid, boolean, boolean), public.admin_aprovar(uuid), public.apagar_conta(), public.e_admin(), public.pode_publicar() from public, anon;
 grant execute on function public.admin_bloquear(uuid, boolean, boolean), public.admin_aprovar(uuid), public.apagar_conta(), public.e_admin(), public.pode_publicar() to authenticated;
 
 drop policy if exists "ler definicoes" on public.definicoes;
@@ -168,6 +173,8 @@ create policy "admin altera definicoes" on public.definicoes for update to authe
 
 drop policy if exists "ler perfis" on public.perfis;
 create policy "ler perfis" on public.perfis for select to authenticated using (true);
+drop policy if exists "visitantes leem nomes" on public.perfis;
+create policy "visitantes leem nomes" on public.perfis for select to anon using (true);
 drop policy if exists "criar o meu perfil" on public.perfis;
 create policy "criar o meu perfil" on public.perfis for insert to authenticated
   with check (id = auth.uid() and not admin and not bloqueado);
@@ -180,6 +187,8 @@ create policy "apagar o meu perfil" on public.perfis for delete to authenticated
 drop policy if exists "ler reportes" on public.reportes;
 create policy "ler reportes" on public.reportes for select to authenticated
   using (not oculto or user_id = auth.uid() or public.e_admin());
+drop policy if exists "visitantes leem reportes" on public.reportes;
+create policy "visitantes leem reportes" on public.reportes for select to anon using (not oculto);
 drop policy if exists "publicar reportes" on public.reportes;
 create policy "publicar reportes" on public.reportes for insert to authenticated
   with check (user_id = auth.uid() and public.pode_publicar());
@@ -189,6 +198,8 @@ create policy "apagar reportes" on public.reportes for delete to authenticated
 
 drop policy if exists "ler confirmacoes" on public.confirmacoes;
 create policy "ler confirmacoes" on public.confirmacoes for select to authenticated using (true);
+drop policy if exists "visitantes leem confirmacoes" on public.confirmacoes;
+create policy "visitantes leem confirmacoes" on public.confirmacoes for select to anon using (true);
 drop policy if exists "confirmar" on public.confirmacoes;
 create policy "confirmar" on public.confirmacoes for insert to authenticated
   with check (user_id = auth.uid() and public.pode_publicar()
