@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
+<script>/* Guarda já o pedido de instalação do navegador, para o botão "Descarregar app" instalar com um só toque. */window.__bip=null;addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__bip=e});</script>
 <link rel="icon" href="icons/icon-192.webp">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <meta name="apple-mobile-web-app-title" content="StreetAlert">
@@ -1238,10 +1239,10 @@ const IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigat
 const ANDROID=/Android/.test(UA);
 function isStandalone(){return safe(()=>matchMedia('(display-mode: standalone)').matches,false)||navigator.standalone===true}
 function canInstallUI(){return !NATIVE&&!isStandalone()}
-let bip=null;
+let bip=window.__bip||null;
 if('serviceWorker' in navigator&&!NATIVE&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();bip=e;if(!$('inst').hidden)openInstall()});
-window.addEventListener('appinstalled',()=>{bip=null;$('install').hidden=true;$('inst').hidden=true;toast(t('App instalada!'))});
+window.addEventListener('appinstalled',()=>{bip=window.__bip=null;$('install').hidden=true;$('inst').hidden=true;toast(t('App instalada!'))});
 let qrDone=false;
 function drawQR(){if(qrDone)return;qrDone=true;const box=$('inst-qr'),url=location.origin+location.pathname;
   const draw=()=>{try{box.innerHTML='';new QRCode(box,{text:url,width:240,height:240,colorDark:'#1b2550',colorLight:'#ffffff'})}catch(e){$('inst-qrbox').hidden=true}};
@@ -1258,10 +1259,12 @@ function openInstall(){
   $('inst-android-menu').hidden=!!bip;$('inst-desk-menu').hidden=!!bip;
   if(sec==='desk')drawQR();
   $('inst').hidden=false}
-$('install').onclick=()=>{closeAll();openInstall()};
+// Onde o navegador permite (Chrome, Edge, Samsung Internet), o toque instala logo a app; senão mostra o passo a passo.
+async function installNow(){const p=bip;bip=window.__bip=null;p.prompt();const r=await p.userChoice.catch(()=>null);
+  if(r&&r.outcome==='accepted'){$('install').hidden=true;$('inst').hidden=true;toast(t('App instalada!'))}return r}
+$('install').onclick=()=>{closeAll();bip=bip||window.__bip;if(bip)installNow();else openInstall()};
 $('inst-close').onclick=()=>{$('inst').hidden=true};
-$('inst-now').onclick=async()=>{if(!bip)return;const p=bip;bip=null;p.prompt();const r=await p.userChoice.catch(()=>null);
-  if(r&&r.outcome==='accepted')$('inst').hidden=true;else openInstall()};
+$('inst-now').onclick=async()=>{if(!bip)return;const r=await installNow();if(!(r&&r.outcome==='accepted'))openInstall()};
 $('install').hidden=!canInstallUI();
 connect();
 // Versão nova publicada? O navegador pode guardar a página até 10 minutos; compara a data da página
