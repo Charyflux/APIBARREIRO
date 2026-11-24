@@ -250,7 +250,7 @@ textarea{resize:none;min-height:70px}
 @keyframes ring{from{transform:scale(.5);opacity:1}to{transform:scale(6);opacity:0}}
 .cl{display:grid;place-items:center;border-radius:50%;color:#fff;font:900 .95rem var(--font);border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.3)}
 .lbl{white-space:nowrap;text-align:center;font-family:var(--font);color:var(--fg);text-shadow:0 0 3px var(--land),0 0 3px var(--land),0 0 6px var(--land);pointer-events:none}
-.lbl.t1{font-weight:900;font-size:13px}
+.lbl.t1{font-weight:900;font-size:14px;color:#fff;text-shadow:0 0 2px #0b1230,0 0 3px #0b1230,0 0 6px #0b1230}
 .lbl.t2{font-weight:800;font-size:11.5px}
 .lbl.t3{font-weight:700;font-size:10.5px;color:var(--muted)}
 .lbl.fr{font-weight:800;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
@@ -688,6 +688,7 @@ function recolor(style,P){
       set('text-color',isDark()?'#eef1ff':'#2b2440');set('text-halo-color',isDark()?'#1b2550':'#ffffff');set('text-halo-width',1.6)}
   }
   addRefs(style);
+  addPlaces(style);
   return style}
 // Pontos de referência: esquadras, hospitais, escolas, praças, estações, etc. (dados OSM via OpenFreeMap)
 const REF=[
@@ -725,6 +726,44 @@ function addRefs(style){
      filter:['all',['has','name'],['any',['==',['get','class'],'pedestrian'],['>=',['index-of','Praça',['to-string',['get','name']]],0],['>=',['index-of','Largo',['to-string',['get','name']]],0],['>=',['index-of','Rossio',['to-string',['get','name']]],0]]],
      layout:{'text-field':name,'text-font':bold,'text-size':13,'symbol-placement':'point','text-max-width':8},
      paint:{'text-color':dark?'#e9d5ff':'#7e22ce','text-halo-color':dark?'#1b2550':'#ffffff','text-halo-width':2}}
+  );
+}
+// Nomes de cidades e localidades: em português e com hierarquia. As grandes cidades ficam
+// em branco, maiores e com contorno escuro, visíveis desde o mapa afastado.
+const CIDADES1=['Lisboa','Porto','Braga','Aveiro','Coimbra','Faro','Setúbal','Évora','Viseu','Leiria','Fátima','Funchal','Ponta Delgada',
+  'Viana do Castelo','Vila Real','Bragança','Guarda','Castelo Branco','Portalegre','Santarém','Beja','Angra do Heroísmo','Guimarães'];
+const CIDADES2=['Barreiro','Almada','Amadora','Sintra','Cascais','Oeiras','Loures','Odivelas','Seixal','Vila Nova de Gaia','Matosinhos','Maia',
+  'Gondomar','Póvoa de Varzim','Vila do Conde','Figueira da Foz','Portimão','Lagos','Albufeira','Tavira','Olhão','Tomar','Torres Vedras',
+  'Caldas da Rainha','Covilhã','Chaves','Peniche','Nazaré','Alcobaça','Barcelos','Famalicão','Vila Nova de Famalicão','Santa Maria da Feira',
+  'Ovar','Espinho','Valongo','Paredes','Penafiel','Amarante','Lamego','Mafra','Montijo','Palmela','Sesimbra','Moita','Entroncamento',
+  'Abrantes','Elvas','Sines','Horta','Ribeira Grande','Câmara de Lobos','Ílhavo','Águeda','Oliveira de Azeméis','São João da Madeira'];
+function addPlaces(style){
+  const src=Object.keys(style.sources||{}).find(k=>style.sources[k].type==='vector');if(!src)return;
+  const font=(style.layers.find(l=>l.layout&&l.layout['text-font'])||{layout:{'text-font':['Noto Sans Regular']}}).layout['text-font'];
+  const bold=font.map(f=>f.replace(/Regular|Italic/,'Bold'));
+  const dark=isDark();
+  // esconder os nomes de localidades do estilo (vinham por vezes em inglês, ex.: "Lisbon"); ficam países e regiões
+  for(const l of style.layers)if(l.type==='symbol'&&l['source-layer']==='place'&&!/country|continent|state|province/.test(l.id)){l.layout=l.layout||{};l.layout.visibility='none'}
+  const name=['coalesce',['get','name:pt'],['get','name'],['get','name:latin']];
+  const nm=['coalesce',['get','name'],''];
+  const cls=['get','class'];
+  const big1=['in',nm,['literal',CIDADES1]],big2=['any',['in',nm,['literal',CIDADES2]],['==',cls,'city']];
+  const base={type:'symbol',source:src,'source-layer':'place'};
+  const lay=(size,extra)=>({'text-field':name,'text-font':bold,'text-size':size,'text-max-width':8,'text-padding':4,
+    'symbol-sort-key':['coalesce',['get','rank'],99],...extra});
+  style.layers.push(
+    {...base,id:'pt-locais',minzoom:12.5,filter:['in',cls,['literal',['village','hamlet','suburb','quarter','neighbourhood','locality','isolated_dwelling']]],
+     layout:lay(['interpolate',['linear'],['zoom'],12.5,11,17,13.5],{'text-font':font}),
+     paint:{'text-color':dark?'#b9c0e6':'#5a5f73','text-halo-color':dark?'#1b2550':'#ffffff','text-halo-width':1.5}},
+    {...base,id:'pt-vilas',minzoom:9,filter:['all',['==',cls,'town'],['!',big1],['!',big2]],
+     layout:lay(['interpolate',['linear'],['zoom'],9,11,14,14]),
+     paint:{'text-color':dark?'#e3e7ff':'#2b2440','text-halo-color':dark?'#1b2550':'#ffffff','text-halo-width':1.8}},
+    {...base,id:'pt-cidades2',minzoom:8,filter:['all',big2,['!',big1]],
+     layout:lay(['interpolate',['linear'],['zoom'],8,12.5,12,16,16,19]),
+     paint:{'text-color':'#ffffff','text-halo-color':'#0b1230','text-halo-width':2.2,'text-halo-blur':.4}},
+    {...base,id:'pt-cidades1',minzoom:5,filter:big1,
+     layout:lay(['interpolate',['linear'],['zoom'],5,12,8,15,12,19,16,22],{'text-letter-spacing':.03,'text-allow-overlap':false}),
+     paint:{'text-color':'#ffffff','text-halo-color':'#0b1230','text-halo-width':2.6,'text-halo-blur':.4}}
   );
 }
 function useVector(){
