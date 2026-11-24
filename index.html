@@ -405,13 +405,13 @@ textarea{resize:none;min-height:70px}
   </div>
 </section>
 
-<!-- entrada: conta obrigatória -->
+<!-- conta: só é pedida para publicar, confirmar ou denunciar -->
 <div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="g-title">
   <div class="gate-card">
     <div class="gate-logo"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg>StreetAlert<button type="button" class="langbtn" data-lang-toggle></button></div>
     <div id="g-login">
-      <h2 id="g-title">Entrar</h2>
-      <p class="lead">Para ver e marcar alertas precisas de uma conta. Cada ponto no mapa mostra o nome de quem o marcou.</p>
+      <h2 id="g-title">Para publicares, cria a tua conta ou entra</h2>
+      <p class="lead">Ver o mapa é livre. Para marcar alertas, confirmar ou denunciar precisas de uma conta. Escreve o teu email e enviamos-te um código: se ainda não tens conta, ela é criada nesse momento.</p>
       <button type="button" class="btn soft" id="g-google" hidden><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar com Google</button>
       <div class="or" id="g-or" hidden>ou com email</div>
       <label class="f" for="g-email">O teu email
@@ -431,7 +431,7 @@ textarea{resize:none;min-height:70px}
       <label class="f" for="g-nome">Nome de exibição
         <input class="inp" id="g-nome" maxlength="30" autocomplete="nickname" placeholder="Ex.: Ana P.">
       </label>
-      <div class="note" data-i18n="g-note"><b>O teu nome fica visível.</b> Aparece junto a cada ponto que marcares e pode ser visto por todas as pessoas com conta na app. Podes usar só o primeiro nome ou uma alcunha. O teu email e telemóvel nunca aparecem. <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>
+      <div class="note" data-i18n="g-note"><b>O teu nome fica visível.</b> Aparece junto a cada ponto que marcares e pode ser visto por qualquer pessoa que abra a app. Podes usar só o primeiro nome ou uma alcunha. O teu email e telemóvel nunca aparecem. <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>
       <label class="check"><input type="checkbox" id="g-ok"> Percebi e aceito que este nome apareça nos meus reportes.</label>
       <button type="submit" class="btn go" id="g-save" disabled>Continuar</button>
     </form>
@@ -444,6 +444,7 @@ textarea{resize:none;min-height:70px}
       <button type="button" class="btn go" id="g-tel-verify" hidden>Confirmar</button>
     </div>
     <div class="err" id="g-err" hidden></div>
+    <button type="button" class="linkbtn" id="g-close">Agora não</button>
     <button type="button" class="linkbtn" id="g-out" hidden>Sair</button>
   </div>
 </div>
@@ -809,10 +810,11 @@ const store={
 };
 async function connect(){
   if(WANT_SB){
-    if(!SB){gate('login');gerr(t('Não foi possível ligar ao servidor. Verifica a internet e recarrega a página.'));$('g-send').disabled=true;live('Sem ligação');return}
-    live('A ligar');
+    if(!SB){live('Sem ligação');onboard();return}
+    live('A ligar');$('acct').hidden=false;
     $('g-google').hidden=$('g-or').hidden=!(CFG.google&&!NATIVE);
     SB.auth.onAuthStateChange((ev,s)=>{setTimeout(()=>onAuth(ev,s),0)});
+    startLive();onboard(); // o mapa e os reportes estão abertos a todos, mesmo sem sessão
     return}
   let d=null,u=null;
   if(window.claude&&claude.use){[d,u]=await Promise.all([claude.use('db').catch(()=>null),claude.use('user').catch(()=>null)])}
@@ -829,7 +831,31 @@ function gate(step){
   $('gate').hidden=!step;
   for(const k of ['login','code','name','phone'])$('g-'+k).hidden=k!==step;
   $('g-err').hidden=true;$('g-out').hidden=!(step==='name'||step==='phone');
+  $('g-close').hidden=!(step==='login'||step==='code');
 }
+// Ver é livre; publicar, confirmar e denunciar exigem conta. A ação pedida fica guardada
+// (também se o login sair da página, como no Google) e continua depois de entrar.
+const K_PEND='ap-pending-v1';
+const pend={get:()=>safe(()=>JSON.parse(sessionStorage.getItem(K_PEND)||'null'),null),
+  set:v=>safe(()=>v?sessionStorage.setItem(K_PEND,JSON.stringify(v)):sessionStorage.removeItem(K_PEND))};
+let profChecked=false;
+function accountStep(){if(!session)return 'login';if(!perfil)return 'name';
+  if(defs.exigir_telemovel&&!session.user.phone_confirmed_at&&!perfil.admin)return 'phone';return null}
+function needAccount(p){
+  if(!WANT_SB)return true;
+  if(!SB){toast(t('Não foi possível ligar ao servidor. Verifica a internet e recarrega a página.'));return false}
+  if(session&&!profChecked){toast(t('Um momento…'));return false}
+  const st=accountStep();
+  if(!st){if(perfil.bloqueado){toast(t('A tua conta está bloqueada'));return false}return true}
+  pend.set(p||null);gate(st);if(st==='login')setTimeout(()=>$('g-email').focus(),50);return false}
+async function runPending(){const p=pend.get();if(!p)return;pend.set(null);
+  if(!perfil||perfil.bloqueado){if(perfil)toast(t('A tua conta está bloqueada'));return}
+  if(p.type==='aim'){closeAll();if(p.lat!=null)map.setView([p.lat,p.lng],Math.max(p.z||12,12),{animate:false});else if(map.getZoom()<12)map.setZoom(12);setUI('aim')}
+  else if(p.type==='confirm'||p.type==='flag'){const r=reports.find(x=>x.id===p.id);if(!r)return;
+    if(!current||current.id!==r.id||$('s-detail').hidden)showDetail(r,false,true);
+    if(p.type==='confirm'){if(!$('d-confirm').disabled)$('d-confirm').click()}
+    else if(!$('d-flag').hidden)$('d-flagbox').hidden=false}}
+$('g-close').onclick=()=>{pend.set(null);gate(null)};
 function gerr(t){$('g-err').textContent=t;$('g-err').hidden=false}
 function errMsg(e){const m=String((e&&(e.message||e.error_description||e.msg))||'');
   const lim=m.match(/limite_diario:(\d+)/);
@@ -846,7 +872,9 @@ function errMsg(e){const m=String((e&&(e.message||e.error_description||e.msg))||
   return t('Algo correu mal. Tenta outra vez.')}
 async function busy(btn,fn){btn.disabled=true;try{await fn()}finally{btn.disabled=false}}
 function onAuth(ev,s){
-  if(!s){session=null;me=null;perfil=null;stopLive();reports=[];render();closeAll();$('acct').hidden=true;gate('login');live('Sem sessão');return}
+  if(!s){const had=!!session;session=null;me=null;perfil=null;profChecked=false;$('acct').hidden=false;
+    if(had){closeAll();gate(null)}
+    if(started){if(had)loadReports()}else startLive();return}
   const same=session&&session.user.id===s.user.id;session=s;
   if(same&&started&&ev!=='USER_UPDATED')return;
   afterLogin();
@@ -855,10 +883,12 @@ async function afterLogin(){
   me=session.user.id;
   const [p,d]=await Promise.all([SB.from('perfis').select('*').eq('id',me).maybeSingle(),SB.from('definicoes').select('*').eq('id',1).maybeSingle()]);
   if(p.error){gate('login');gerr(errMsg(p.error));return}
-  defs=d.data||{};perfil=p.data;
+  defs=d.data||{};perfil=p.data;profChecked=true;
   if(!perfil){gate('name');const md=session.user.user_metadata||{};$('g-nome').value=String(md.full_name||md.name||'').split(' ')[0].slice(0,30);$('g-ok').checked=false;checkName();return}
   if(defs.exigir_telemovel&&!session.user.phone_confirmed_at&&!perfil.admin){gate('phone');return}
-  gate(null);$('acct').hidden=false;startLive();onboard();
+  gate(null);$('acct').hidden=false;
+  if(started)await loadReports();else startLive(); // volta a ler: agora já se sabe o que é meu
+  onboard();runPending();
 }
 const cleanName=v=>v.replace(/\s+/g,' ').trim();
 function nameIssue(n){if(n.length<2)return t('O nome precisa de pelo menos 2 letras.');if(/[@<>]|https?:|www\./i.test(n))return t('Usa só um nome, sem emails nem links.');return null}
@@ -903,7 +933,7 @@ function stopLive(){started=false;clearInterval(pollT);if(chan){SB.removeChannel
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&started)queueLoad()});
 
 // ---------- a minha conta ----------
-$('acct').onclick=()=>{closeAll();if(!perfil)return;
+$('acct').onclick=()=>{closeAll();if(!SB)return;const st=accountStep();if(st){gate(st);return}
   $('c-email').textContent=session.user.email||session.user.phone||'';$('c-nome').value=perfil.nome;$('c-err').hidden=true;
   $('c-blocked').hidden=!perfil.bloqueado;$('c-admin').hidden=!perfil.admin;$('c-del').dataset.c='';$('c-del').textContent=t('Apagar a minha conta');
   $('s-conta').hidden=false;setUI('sheet')};
@@ -1002,10 +1032,10 @@ function setUI(mode){
   $('top').style.visibility=mode==='aim'?'hidden':'';
 }
 function closeAll(){['s-cat','s-form','s-detail','s-conta'].forEach(i=>$(i).hidden=true);$('d-flagbox').hidden=true;draftMarker.remove();current=null;setUI('idle')}
-$('fab').onclick=()=>{closeAll();if(SB&&perfil&&perfil.bloqueado){toast(t('A tua conta está bloqueada'));return}if(map.getZoom()<12)map.setZoom(12);setUI('aim')};
+$('fab').onclick=()=>{closeAll();const c=map.getCenter();if(!needAccount({type:'aim',lat:c.lat,lng:c.lng,z:map.getZoom()}))return;if(map.getZoom()<12)map.setZoom(12);setUI('aim')};
 $('place-cancel').onclick=closeAll;
 $('place-ok').onclick=()=>{const c=map.getCenter();startReport(c)};
-map.on('click',e=>{if(!$('placebar').hidden)return;if(SB&&(!perfil||perfil.bloqueado))return;startReport(e.latlng)});
+map.on('click',e=>{if(!$('placebar').hidden)return;if(WANT_SB&&(!SB||accountStep()||perfil.bloqueado))return;startReport(e.latlng)}); // sem conta, tocar no mapa não abre nada
 function startReport(ll){
   closeAll();
   draft={lat:+ll.lat.toFixed(4),lng:+ll.lng.toFixed(4)};
@@ -1080,8 +1110,8 @@ function showDetail(r,keep,nopan){
   $('s-detail').hidden=false;setUI('sheet');
 }
 $('d-close').onclick=closeAll;
-$('d-confirm').onclick=async()=>{if(!current)return;$('d-confirm').disabled=true;try{await store.confirm(current);toast(t('Obrigado pela confirmação'))}catch(e){$('d-confirm').disabled=false;toast(SB?errMsg(e):t('Não deu para confirmar'))}};
-$('d-flag').onclick=()=>{$('d-flagbox').hidden=!$('d-flagbox').hidden};
+$('d-confirm').onclick=async()=>{if(!current)return;if(!needAccount({type:'confirm',id:current.id}))return;$('d-confirm').disabled=true;try{await store.confirm(current);toast(t('Obrigado pela confirmação'))}catch(e){$('d-confirm').disabled=false;toast(SB?errMsg(e):t('Não deu para confirmar'))}};
+$('d-flag').onclick=()=>{if(current&&!needAccount({type:'flag',id:current.id}))return;$('d-flagbox').hidden=!$('d-flagbox').hidden};
 document.querySelectorAll('[data-motivo]').forEach(b=>b.onclick=async()=>{if(!current)return;const r=current;
   document.querySelectorAll('[data-motivo]').forEach(x=>x.disabled=true);
   try{await store.flag(r,b.dataset.motivo);$('d-flagbox').hidden=true;$('d-flag').hidden=true;toast(t('Obrigado. Um administrador vai rever'))}

@@ -31,7 +31,9 @@ const EN={
 'A tua conta foi bloqueada por um administrador. Podes ver o mapa, mas não podes publicar, confirmar nem denunciar.':'Your account was blocked by an administrator. You can still see the map, but you cannot publish, confirm or flag.',
 'Nome que aparece nos teus reportes':'Name shown on your reports','Guardar nome':'Save name','Painel de administração':'Admin panel',
 'Terminar sessão':'Sign out','Apagar a minha conta':'Delete my account','Política de privacidade':'Privacy policy',
-'Entrar':'Sign in','Para ver e marcar alertas precisas de uma conta. Cada ponto no mapa mostra o nome de quem o marcou.':'You need an account to see and post alerts. Each point on the map shows the name of the person who posted it.',
+'Entrar':'Sign in','Para publicares, cria a tua conta ou entra':'To post, create your account or sign in',
+'Ver o mapa é livre. Para marcar alertas, confirmar ou denunciar precisas de uma conta. Escreve o teu email e enviamos-te um código: se ainda não tens conta, ela é criada nesse momento.':'Anyone can view the map. To post alerts, confirm or flag you need an account. Enter your email and we\'ll send you a code: if you don\'t have an account yet, it is created at that moment.',
+'Um momento…':'One moment…',
 'Continuar com Google':'Continue with Google','ou com email':'or with email','O teu email':'Your email','Enviar código':'Send code',
 'Vê o teu email':'Check your email','Enviámos um código para':'We sent a code to','. Escreve-o aqui ou toca no link do email.':'. Type it here or tap the link in the email.',
 'Código':'Code','Código do email':'Email code','Usar outro email':'Use another email','Como te chamamos?':'What should we call you?',
@@ -112,7 +114,7 @@ const HT={
 'tut-p4':'The coloured dots are landmarks: police stations, hospitals, schools, supermarkets, restaurants and more. The <b>target</b> button takes the map to where you are. The <b>?</b> shows this help again.',
 'askloc-p0':'With your location, the map opens right on your street and you see the alerts around you. Your location <b>stays on your phone</b>: we never receive or store it.',
 'askloc-p1':'Next, your phone or browser will ask for permission. Press <b>Allow</b>.',
-'g-note':'<b>Your name is visible.</b> It appears next to every point you post and can be seen by everyone with an account in the app. You can use just your first name or a nickname. Your email and mobile number are never shown. <a href="privacidade.html" target="_blank" rel="noopener">Privacy policy</a>'
+'g-note':'<b>Your name is visible.</b> It appears next to every point you post and can be seen by anyone who opens the app. You can use just your first name or a nickname. Your email and mobile number are never shown. <a href="privacidade.html" target="_blank" rel="noopener">Privacy policy</a>'
 };
 const PT={};for(const k in EN)if(!(EN[k] in PT))PT[EN[k]]=k;
 const ptHTML=new Map();
