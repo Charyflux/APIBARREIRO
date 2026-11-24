@@ -1,14 +1,17 @@
-# Publicar a StreetAlert (web, Android e iOS)
+# Publicar a StreetAlert
 
-A app é o mesmo site (`index.html`) empacotado com [Capacitor](https://capacitorjs.com).
-Quando mudas o site, a app muda também na próxima compilação.
+A StreetAlert é distribuída como **app web instalável (PWA)**, a partir de https://streetalert.online (GitHub Pages, domínio próprio). Não há APK nem IPA para descarregar: qualquer aparelho instala a app diretamente pelo navegador, e cada alteração publicada chega logo a toda a gente.
 
-| Plataforma | Onde fica | O que precisas |
-|---|---|---|
-| Web | https://streetalert.online (GitHub Pages, domínio próprio) | Nada. Também se instala no telemóvel com "Adicionar ao ecrã inicial". |
-| Android (APK de teste) | GitHub > Actions > "Android (APK e AAB)" > Artifacts | Nada. Compila sozinho a cada alteração. |
-| Android (Google Play) | Ficheiro `.aab` assinado no mesmo sítio | Conta Google Play Console (25 USD, pagamento único) e uma chave de assinatura. |
-| iOS (IPA, App Store) | GitHub > Actions > "iOS (IPA)" > Run workflow | Conta Apple Developer (99 USD/ano), certificado e perfil de distribuição. |
+## Instalar a app (PWA)
+
+O site tem um botão **Descarregar app**. O popup tem separadores **Android** e **iPhone** (e **Computador** num computador), com o aparelho de quem abre já selecionado:
+- **Android e computador (Chrome, Edge, Samsung Internet):** o toque no botão abre logo a janela de instalação do navegador. Noutros navegadores mostra o caminho pelo menu ⋮.
+- **iPhone/iPad:** a Apple não deixa nenhum site instalar-se com um só toque, por isso mostra o passo a passo "Partilhar > Adicionar ao ecrã principal" (no Safari), com uma seta a apontar para o botão Partilhar.
+- **Computador:** mostra também um QR code para abrir o site no telemóvel.
+
+O botão desaparece quando a app já está instalada.
+
+O que torna a app instalável: `manifest.webmanifest` (nome, ícones 192/512 normais e "maskable", `start_url`, `scope`, cores, `display: standalone`), o service worker `sw.js` (sem cache, com página simples quando não há internet), HTTPS e os meta-tags do iOS em `index.html`.
 
 ## Domínio streetalert.online
 
@@ -85,28 +88,23 @@ O SMS tem custo por mensagem (cobrado pelo fornecedor de SMS, não pelo Supabase
 
 Os alertas que cada pessoa guardou só no próprio aparelho antes desta mudança não passam para a base de dados.
 
-## Android
+## Desenvolver no computador
 
-### Botão "Descarregar app" no site
-O site tem um botão **Descarregar app** que reconhece o aparelho:
-- **Android:** instala a app diretamente pelo navegador (PWA) quando o Chrome o permite, ou descarrega o APK.
-- **iPhone/iPad:** mostra os passos "Partilhar > Adicionar ao ecrã principal". Um ficheiro IPA não se pode instalar fora da App Store/TestFlight. Quando a app estiver na App Store, põe o link em `config.js` como `appStoreUrl: 'https://apps.apple.com/...'` e aparece um botão "Ver na App Store".
-- **Computador:** instala a app no Chrome/Edge e mostra um QR code para abrir no telemóvel.
+```
+npm install
+npm run sync        # copia o site para a app (www/) e atualiza android/ e ios/
+npm run android     # abre no Android Studio
+npm run ios         # abre no Xcode (só em Mac)
+npm run assets      # regenera ícones e ecrã inicial a partir de assets/
+```
 
-O botão desaparece quando a app já está instalada.
+Identificador da app: `pt.alertaportugal.app` (em `capacitor.config.json`). O nome visível é **StreetAlert**; o identificador interno ficou igual para não estragar as compilações já configuradas, mas ainda o podes mudar antes da primeira publicação nas lojas.
 
-### Link fixo do APK (sempre atualizado)
-Em cada alteração na `main`, o GitHub compila o APK e publica-o na release **app-latest**, sempre no mesmo endereço público:
+## Apêndice: lojas de apps (opcional, para o futuro)
 
-https://github.com/Charyflux/APIBARREIRO/releases/latest/download/streetalert.apk
+A pasta do projeto continua preparada com [Capacitor](https://capacitorjs.com) para, um dia, publicar a mesma app na Google Play e na App Store. Nada disto é preciso para a PWA. O GitHub continua a compilar a versão Android a cada alteração (Actions > "Android (APK e AAB)"), só para confirmar que o projeto compila; já não é publicado nenhum APK no site.
 
-Quem o instala tem de autorizar "fontes desconhecidas" (instalação fora da Google Play).
-
-**Importante:** enquanto não houver chave de assinatura (ver abaixo), esse APK é de **teste (debug)**. Cada compilação é assinada com uma chave temporária diferente, por isso, para atualizar, a pessoa pode ter de desinstalar a versão anterior. Não serve para distribuir a sério. Assim que configurares a chave, o link passa a ter automaticamente o APK **assinado (release)**, que se atualiza por cima da versão anterior.
-
-Os APK de teste também continuam em **Actions** > última execução de "Android (APK e AAB)" > **Artifacts** (expiram e exigem login).
-
-### Versão assinada para a Google Play
+### Android (Google Play)
 1. Cria a chave uma vez (num computador com Java):
    ```
    keytool -genkey -v -keystore alerta.jks -keyalg RSA -keysize 2048 -validity 10000 -alias alerta
@@ -120,7 +118,7 @@ Os APK de teste também continuam em **Actions** > última execução de "Androi
    - `ANDROID_KEY_PASSWORD`
 4. Na próxima execução aparece o artefacto `alerta-portugal-release` com o `.apk` e o `.aab` assinados. Envia o `.aab` na Google Play Console.
 
-## iOS
+### iOS (App Store)
 
 1. Inscreve-te no [Apple Developer Program](https://developer.apple.com/programs/).
 2. Em developer.apple.com cria o App ID `pt.alertaportugal.app`, um certificado **Apple Distribution** (exporta como `.p12`) e um perfil **App Store** para esse App ID.
@@ -132,15 +130,3 @@ Os APK de teste também continuam em **Actions** > última execução de "Androi
 5. Corre **Actions > iOS (IPA) > Run workflow**. O `.ipa` aparece em Artifacts. Envia-o com a app Transporter (Mac) ou pelo App Store Connect.
 
 Sem estes secrets, o workflow de iOS só confirma que o projeto compila.
-
-## Desenvolver no computador
-
-```
-npm install
-npm run sync        # copia o site para a app (www/) e atualiza android/ e ios/
-npm run android     # abre no Android Studio
-npm run ios         # abre no Xcode (só em Mac)
-npm run assets      # regenera ícones e ecrã inicial a partir de assets/
-```
-
-Identificador da app: `pt.alertaportugal.app` (em `capacitor.config.json`). O nome visível é **StreetAlert**; o identificador interno ficou igual para não estragar as compilações já configuradas, mas ainda o podes mudar antes da primeira publicação nas lojas.
