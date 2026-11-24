@@ -26,7 +26,7 @@ const EN={
 'Publicar':'Publish','Detalhe do reporte':'Report detail','Também vi isto':'I saw this too','Fechar':'Close','Apagar o meu reporte':'Delete my report',
 'Denunciar este reporte':'Flag this report','Porque queres denunciar?':'Why are you flagging it?',
 'Falso ou inventado':'False or made up','Ofensivo':'Offensive','Identifica pessoas':'Identifies people','Spam ou repetido':'Spam or duplicate',
-'Continente':'Mainland','Madeira':'Madeira','Açores':'Azores','Lisboa':'Lisbon','Porto':'Porto','Sem resultados':'No results','{n} mil hab.':'{n}k people',
+'Continente':'Mainland','Madeira':'Madeira','Açores':'Azores','Lisboa':'Lisbon','Porto':'Porto','Sem resultados':'No results','Procurar':'Search','A procurar…':'Searching…','Toca na lupa ou em Pesquisar para procurar «{q}».':'Tap the magnifier or Search to look up “{q}”.','Não encontrámos «{q}» em Portugal. Confirma o nome ou experimenta uma cidade próxima.':'We couldn’t find “{q}” in Portugal. Check the name or try a nearby city.','Sem ligação para procurar «{q}». Verifica a internet e tenta outra vez.':'No connection to search for “{q}”. Check your internet and try again.','{n} mil hab.':'{n}k people',
 // ---------- conta ----------
 'A tua conta foi bloqueada por um administrador. Podes ver o mapa, mas não podes publicar, confirmar nem denunciar.':'Your account was blocked by an administrator. You can still see the map, but you cannot publish, confirm or flag.',
 'Nome que aparece nos teus reportes':'Name shown on your reports','Guardar nome':'Save name','Painel de administração':'Admin panel',
