@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Segurança: só deixa carregar código deste site e falar com os serviços que a app usa (ver SEGURANCA.md). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://tile.openstreetmap.org https://tiles.openfreemap.org; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://tiles.openfreemap.org https://photon.komoot.io https://nominatim.openstreetmap.org; worker-src 'self' blob:; child-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'; upgrade-insecure-requests">
+<script>/* Proteção contra clickjacking: o site publicado não pode ser aberto dentro de uma moldura (iframe) de outro site. */(function(){try{if(window.top!==window.self&&/(^|\.)streetalert\.online$/.test(location.hostname)){document.documentElement.style.display='none';window.top.location.replace(location.href)}}catch(e){}})();</script>
 <link rel="manifest" href="manifest.webmanifest">
 <script>/* Guarda já o pedido de instalação do navegador, para o botão "Descarregar app" instalar com um só toque. */window.__bip=null;addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__bip=e});</script>
 <link rel="icon" href="icons/icon-192.webp">
@@ -597,12 +600,13 @@ textarea{resize:none;min-height:70px}
 
 <script src="i18n.js"></script>
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
+<!-- Bibliotecas guardadas no próprio site (pasta vendor/), sem depender de CDNs de terceiros. -->
+<script src="vendor/supabase-2.45.4/supabase.js"></script>
+<script src="vendor/leaflet-1.9.4.js"></script>
+<script src="vendor/leaflet.markercluster-1.5.3.js"></script>
+<link rel="stylesheet" href="vendor/maplibre-gl-4.7.1.css">
+<script src="vendor/maplibre-gl-4.7.1.js"></script>
+<script src="vendor/leaflet-maplibre-gl-0.0.22.js"></script>
 <script>
 (function(){
 const $=id=>document.getElementById(id);
@@ -611,6 +615,7 @@ const safe=(f,fb)=>{try{return f()}catch(e){return fb}};
 const I=window.I18N||{t:(s,v)=>v?s.replace(/\{(\w+)\}/g,(m,k)=>k in v?v[k]:m):s,L:(a)=>a,lang:'pt',onChange(){},locale:()=>'pt-PT'};
 const t=I.t,LG=I.L;
 const catLabel=c=>t(CATS[c].label);
+const isCat=c=>Object.prototype.hasOwnProperty.call(CATS,c);
 const CATS={
   violencia:{label:"Violência",c:'--viol',c2:'--viol-2'},
   estacionamento:{label:"Mau estacionamento",c:'--park',c2:'--park-2'}
@@ -876,7 +881,7 @@ setTimeout(()=>{if(!decided){decided=true;loadGeo(true)}},6000);
 const lab={t1:L.layerGroup(),t2:L.layerGroup(),t3:L.layerGroup(),fr:L.layerGroup(),dist:L.layerGroup(),sea:L.layerGroup(),shield:L.layerGroup()};
 let lisboaLayer=null,roads=[];
 function label(latlng,text,cls,group){
-  L.marker(latlng,{pane:'labels',interactive:false,keyboard:false,icon:L.divIcon({className:'lbl '+cls,html:text.replace(/</g,'&lt;'),iconSize:[160,16],iconAnchor:[80,-4]})}).addTo(group);
+  L.marker(latlng,{pane:'labels',interactive:false,keyboard:false,icon:L.divIcon({className:'lbl '+cls,html:String(text).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';'),iconSize:[160,16],iconAnchor:[80,-4]})}).addTo(group);
 }
 function loadGeo(draw){
   fetch('mapa-pt.json').then(r=>r.json()).then(g=>{
@@ -1104,7 +1109,7 @@ function pinIcon(r){const isNew=fresh.has(r.id);const hot=Date.now()-new Date(r.
 function render(){
   cluster.clearLayers();const n={violencia:0,estacionamento:0};const list=[];
   for(const r of reports){
-    if(!CATS[r.cat]||typeof r.lat!=='number'||typeof r.lng!=='number'||!inPeriod(r))continue;
+    if(!isCat(r.cat)||typeof r.lat!=='number'||typeof r.lng!=='number'||!inPeriod(r))continue;
     n[r.cat]++;if(!active[r.cat])continue;
     list.push(L.marker([r.lat,r.lng],{icon:pinIcon(r),cat:r.cat,title:catLabel(r.cat),riseOnHover:true}).on('click',e=>{L.DomEvent.stop(e);showDetail(r)}));
   }
@@ -1115,7 +1120,7 @@ function render(){
 }
 function renderList(){
   const box=$('rlist');box.innerHTML='';
-  const items=reports.filter(r=>CATS[r.cat]&&active[r.cat]&&inPeriod(r)).sort((a,b)=>new Date(b.quando)-new Date(a.quando)).slice(0,40);
+  const items=reports.filter(r=>isCat(r.cat)&&active[r.cat]&&inPeriod(r)).sort((a,b)=>new Date(b.quando)-new Date(a.quando)).slice(0,40);
   if(!items.length){box.innerHTML='<div class="rempty"></div>';box.firstChild.textContent=t('Ainda não há reportes neste período. Toca no lápis amarelo para criar o primeiro.');return}
   for(const r of items){const b=document.createElement('button');b.className='ritem';
     b.innerHTML=`<span class="ic">${badge(r.cat,34)}</span><span><strong></strong><p></p><small></small></span>`;
@@ -1358,7 +1363,7 @@ let qrDone=false;
 function drawQR(){if(qrDone)return;qrDone=true;const box=$('inst-qr'),url=location.origin+location.pathname;
   const draw=()=>{try{box.innerHTML='';new QRCode(box,{text:url,width:240,height:240,colorDark:'#1b2550',colorLight:'#ffffff'})}catch(e){$('inst-qrbox').hidden=true}};
   if(window.QRCode)return draw();
-  const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  const sc=document.createElement('script');sc.src='vendor/qrcode-1.0.0.min.js';
   sc.onload=draw;sc.onerror=()=>{$('inst-qrbox').hidden=true};document.head.append(sc)}
 const MYSEC=IOS?'ios':ANDROID?'android':'desk';
 let instSec=MYSEC;

@@ -14,6 +14,10 @@ create table if not exists public.definicoes (
   denuncias_para_ocultar int not null default 3     -- denúncias que escondem um reporte até um admin rever
 );
 insert into public.definicoes (id) values (1) on conflict do nothing;
+alter table public.definicoes drop constraint if exists definicoes_valores_validos;
+alter table public.definicoes add constraint definicoes_valores_validos
+  check (limite_conta_nova between 1 and 1000 and limite_normal between 1 and 1000
+         and dias_conta_nova between 0 and 365 and denuncias_para_ocultar between 1 and 100) not valid;
 
 -- ---------- Perfis: o nome de exibição de cada conta ----------
 create table if not exists public.perfis (
@@ -23,6 +27,10 @@ create table if not exists public.perfis (
   bloqueado boolean not null default false,
   admin boolean not null default false
 );
+-- Segurança: o nome também é validado no servidor (sem emails, links nem < >), não só na app.
+alter table public.perfis drop constraint if exists perfis_nome_seguro;
+alter table public.perfis add constraint perfis_nome_seguro
+  check (nome !~* '[@<>]|https?:|www\.') not valid;
 
 -- ---------- Reportes ----------
 create table if not exists public.reportes (
@@ -157,7 +165,9 @@ grant select (id, nome) on public.perfis to anon;
 grant select (id, user_id, cat, lat, lng, descricao, quando, criado, oculto) on public.reportes to anon;
 grant select (reporte_id, user_id) on public.confirmacoes to anon;
 grant select, update on public.definicoes to authenticated;
-grant select, insert, delete on public.perfis to authenticated;
+grant select on public.perfis to authenticated;
+grant insert (id, nome) on public.perfis to authenticated;     -- criado/admin/bloqueado ficam sempre nos valores por omissão
+-- Sem delete direto no perfil: apagar e voltar a criar o perfil limpava o bloqueio. Apagar a conta é pela função apagar_conta().
 grant update (nome) on public.perfis to authenticated;           -- só o nome; admin/bloqueado mudam por função
 grant select, insert, delete on public.reportes to authenticated; -- sem update: ninguém altera reportes
 grant select, insert, delete on public.confirmacoes to authenticated;
@@ -182,7 +192,6 @@ drop policy if exists "mudar o meu nome" on public.perfis;
 create policy "mudar o meu nome" on public.perfis for update to authenticated
   using (id = auth.uid() and not bloqueado) with check (id = auth.uid());
 drop policy if exists "apagar o meu perfil" on public.perfis;
-create policy "apagar o meu perfil" on public.perfis for delete to authenticated using (id = auth.uid());
 
 drop policy if exists "ler reportes" on public.reportes;
 create policy "ler reportes" on public.reportes for select to authenticated
@@ -212,8 +221,7 @@ create policy "ler denuncias" on public.denuncias for select to authenticated
   using (user_id = auth.uid() or public.e_admin());
 drop policy if exists "denunciar" on public.denuncias;
 create policy "denunciar" on public.denuncias for insert to authenticated
-  with check (user_id = auth.uid()
-              and exists (select 1 from public.perfis p where p.id = auth.uid() and not p.bloqueado));
+  with check (user_id = auth.uid() and public.pode_publicar());
 drop policy if exists "admin apaga denuncias" on public.denuncias;
 create policy "admin apaga denuncias" on public.denuncias for delete to authenticated using (public.e_admin());
 

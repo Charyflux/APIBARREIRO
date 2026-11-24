@@ -3,7 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<!-- Segurança: só deixa carregar código deste site e falar com os serviços que a app usa (ver SEGURANCA.md). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<script>/* Proteção contra clickjacking: o site publicado não pode ser aberto dentro de uma moldura (iframe) de outro site. */(function(){try{if(window.top!==window.self&&/(^|\.)streetalert\.online$/.test(location.hostname)){document.documentElement.style.display='none';window.top.location.replace(location.href)}}catch(e){}})();</script>
 <title>Administração · StreetAlert</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap">
 <style>
@@ -72,7 +76,7 @@ label.set:first-of-type{border-top:0}
 </main>
 <script src="i18n.js"></script>
 <script src="config.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="vendor/supabase-2.45.4/supabase.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
