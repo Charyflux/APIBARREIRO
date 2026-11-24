@@ -87,8 +87,24 @@ Os alertas que cada pessoa guardou só no próprio aparelho antes desta mudança
 
 ## Android
 
-### APK de teste (já funciona)
-Em cada alteração na branch `main`, o GitHub compila um APK de teste. Para o descarregar: separador **Actions** > última execução de "Android (APK e AAB)" > **Artifacts** > `alerta-portugal-debug-apk`. Instala-o no telemóvel (é preciso permitir "fontes desconhecidas").
+### Botão "Descarregar app" no site
+O site tem um botão **Descarregar app** que reconhece o aparelho:
+- **Android:** instala a app diretamente pelo navegador (PWA) quando o Chrome o permite, ou descarrega o APK.
+- **iPhone/iPad:** mostra os passos "Partilhar > Adicionar ao ecrã principal". Um ficheiro IPA não se pode instalar fora da App Store/TestFlight. Quando a app estiver na App Store, põe o link em `config.js` como `appStoreUrl: 'https://apps.apple.com/...'` e aparece um botão "Ver na App Store".
+- **Computador:** instala a app no Chrome/Edge e mostra um QR code para abrir no telemóvel.
+
+O botão desaparece quando a app já está instalada.
+
+### Link fixo do APK (sempre atualizado)
+Em cada alteração na `main`, o GitHub compila o APK e publica-o na release **app-latest**, sempre no mesmo endereço público:
+
+https://github.com/Charyflux/APIBARREIRO/releases/latest/download/streetalert.apk
+
+Quem o instala tem de autorizar "fontes desconhecidas" (instalação fora da Google Play).
+
+**Importante:** enquanto não houver chave de assinatura (ver abaixo), esse APK é de **teste (debug)**. Cada compilação é assinada com uma chave temporária diferente, por isso, para atualizar, a pessoa pode ter de desinstalar a versão anterior. Não serve para distribuir a sério. Assim que configurares a chave, o link passa a ter automaticamente o APK **assinado (release)**, que se atualiza por cima da versão anterior.
+
+Os APK de teste também continuam em **Actions** > última execução de "Android (APK e AAB)" > **Artifacts** (expiram e exigem login).
 
 ### Versão assinada para a Google Play
 1. Cria a chave uma vez (num computador com Java):

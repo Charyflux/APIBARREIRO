@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.webp">
-<link rel="apple-touch-icon" href="icons/icon-192.webp">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-title" content="StreetAlert">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <style>.confetti{position:fixed;inset:0;pointer-events:none;z-index:5000;overflow:hidden}
@@ -209,6 +211,18 @@ textarea{resize:none;min-height:70px}
 #home{--b:#8b5cf6;--bd:#5b34b8}
 #help{--b:#0d9488;--bd:#0a5f58}
 #acct{--b:#18a35f;--bd:#0f6b3e}
+/* instalar a app */
+.installbtn{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:calc(28px + env(safe-area-inset-bottom,0px));z-index:700;display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:11px 16px 11px 13px;font:900 .92rem var(--font);color:#fff;background:linear-gradient(135deg,#2f7bff,#14b8a6);box-shadow:0 4px 0 #1a4fa8,0 8px 18px rgba(47,123,255,.4);cursor:pointer;transition:transform .12s,box-shadow .12s}
+.installbtn:hover{filter:brightness(1.06)}
+.installbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #1a4fa8,0 3px 8px rgba(47,123,255,.35)}
+@media (min-width:760px){.installbtn{left:calc(max(16px,env(safe-area-inset-left,0px)) + 376px);bottom:24px}}
+.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;counter-reset:st}
+.steps li{display:flex;align-items:center;gap:12px;font:700 .95rem/1.4 var(--font);color:var(--fg);background:var(--card-2);border-radius:16px;padding:10px 12px}
+.steps .sic{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--card);color:#2f7bff;font:900 1rem var(--font)}
+.mcard p.small{font-size:.8rem}
+.qr{display:flex;gap:14px;align-items:center;background:var(--card-2);border-radius:18px;padding:12px}
+.qr #inst-qr{flex:none;background:#fff;padding:6px;border-radius:10px;line-height:0}
+.qr #inst-qr img,.qr #inst-qr canvas{width:120px;height:120px}
 .ctrls .langbtn{color:rgba(255,255,255,.75);background:linear-gradient(135deg,#ff5c8a,#ff8a3d);box-shadow:0 4px 0 #b8325a,0 8px 18px rgba(255,92,138,.4);padding:9px 13px;transition:transform .12s,box-shadow .12s}
 .ctrls .langbtn svg,.ctrls .langbtn .on{color:#fff}
 .ctrls .langbtn .on{background:rgba(0,0,0,.22);border-radius:999px;padding:1px 6px}
@@ -512,6 +526,41 @@ textarea{resize:none;min-height:70px}
     <h2 id="lochelp-t">A localização está bloqueada</h2>
     <p id="lochelp-txt"></p>
     <button type="button" class="btn go" id="lochelp-ok">Percebi</button>
+  </div>
+</div>
+
+<button class="installbtn" id="install" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M12 7v7m-3-3 3 3 3-3M10 18h4"/></svg><span>Descarregar app</span></button>
+
+<!-- instalar a app: um só botão, instruções conforme o aparelho -->
+<div class="modal" id="inst" hidden role="dialog" aria-modal="true" aria-labelledby="inst-t">
+  <div class="mcard">
+    <div class="mart" style="height:100px"><img src="icons/icon-192.png" width="72" height="72" alt="" style="border-radius:18px;box-shadow:var(--shadow)"></div>
+    <h2 id="inst-t">Instalar a StreetAlert</h2>
+    <p>Fica com um ícone no ecrã principal e abre como uma app, em ecrã inteiro.</p>
+    <button type="button" class="btn go" id="inst-now" hidden>Instalar agora</button>
+    <div id="inst-ios" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p class="note" id="inst-ios-safari" hidden data-i18n="inst-safari">Abre este site no <b>Safari</b> para o poderes instalar.</p>
+      <ol class="steps">
+        <li><span class="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m-4 4 4-4 4 4"/><path d="M8 10H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2"/></svg></span><span data-i18n="inst-ios1">Toca em <b>Partilhar</b>, na barra do Safari.</span></li>
+        <li><span class="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span><span data-i18n="inst-ios2">Escolhe <b>Adicionar ao ecrã principal</b>.</span></li>
+        <li><span class="sic">✓</span><span data-i18n="inst-ios3">Toca em <b>Adicionar</b>. Pronto!</span></li>
+      </ol>
+      <a class="btn soft" id="inst-store" hidden target="_blank" rel="noopener" style="text-decoration:none">Ver na App Store</a>
+    </div>
+    <div id="inst-android" hidden style="display:flex;flex-direction:column;gap:12px">
+      <ol class="steps" id="inst-android-menu">
+        <li><span class="sic">⋮</span><span data-i18n="inst-and1">Toca no menu <b>⋮</b> do navegador.</span></li>
+        <li><span class="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span><span data-i18n="inst-and2">Escolhe <b>Instalar app</b> ou <b>Adicionar ao ecrã principal</b>.</span></li>
+      </ol>
+      <a class="btn soft" id="inst-apk" style="text-decoration:none">Descarregar APK para Android</a>
+      <p class="small">O APK instala-se fora da Google Play: o telemóvel vai pedir para autorizares a instalação de apps desta origem ("fontes desconhecidas").</p>
+    </div>
+    <div id="inst-desk" hidden style="display:flex;flex-direction:column;gap:12px">
+      <p id="inst-desk-menu" data-i18n="inst-desk">No Chrome ou no Edge, clica no ícone de instalar na barra de endereço, ou no menu <b>⋮</b> &gt; <b>Instalar StreetAlert</b>.</p>
+      <div class="qr" id="inst-qrbox"><div id="inst-qr"></div><p>Aponta a câmara do telemóvel para abrires a StreetAlert lá e a instalares.</p></div>
+      <a class="linkbtn" id="inst-apk2">Descarregar APK para Android</a>
+    </div>
+    <button type="button" class="btn line" id="inst-close">Fechar</button>
   </div>
 </div>
 
@@ -1081,7 +1130,7 @@ function nearest(lat,lng){let best=null,bd=1e9;for(const c of cities){if(c.t===3
 let draft=null,draftCat=null,current=null;
 const draftMarker=L.marker([0,0],{interactive:false,keyboard:false});
 function setUI(mode){
-  $('ctrls').hidden=mode!=='idle';
+  $('ctrls').hidden=mode!=='idle';$('install').hidden=mode!=='idle'||!canInstallUI();
   $('aim').hidden=$('placebar').hidden=mode!=='aim';
   $('top').style.visibility=mode==='aim'?'hidden':'';
 }
@@ -1182,6 +1231,38 @@ I.onChange(()=>{live(liveNow[0],liveNow[1]);render();if(!$('tut').hidden)tutPain
   if(!$('results').hidden)showResults();
   if(!$('lochelp').hidden)showLocHelp();
   if(!$('s-conta').hidden&&$('c-del').dataset.c!=='1')$('c-del').textContent=t('Apagar a minha conta')});
+// ---------- instalar a app (um só botão; instruções conforme o aparelho) ----------
+const APK_URL=CFG.apkUrl||'https://github.com/Charyflux/APIBARREIRO/releases/latest/download/streetalert.apk';
+const UA=navigator.userAgent;
+const IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const ANDROID=/Android/.test(UA);
+function isStandalone(){return safe(()=>matchMedia('(display-mode: standalone)').matches,false)||navigator.standalone===true}
+function canInstallUI(){return !NATIVE&&!isStandalone()}
+let bip=null;
+if('serviceWorker' in navigator&&!NATIVE&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();bip=e;if(!$('inst').hidden)openInstall()});
+window.addEventListener('appinstalled',()=>{bip=null;$('install').hidden=true;$('inst').hidden=true;toast(t('App instalada!'))});
+let qrDone=false;
+function drawQR(){if(qrDone)return;qrDone=true;const box=$('inst-qr'),url=location.origin+location.pathname;
+  const draw=()=>{try{box.innerHTML='';new QRCode(box,{text:url,width:240,height:240,colorDark:'#1b2550',colorLight:'#ffffff'})}catch(e){$('inst-qrbox').hidden=true}};
+  if(window.QRCode)return draw();
+  const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  sc.onload=draw;sc.onerror=()=>{$('inst-qrbox').hidden=true};document.head.append(sc)}
+function openInstall(){
+  const sec=IOS?'ios':ANDROID?'android':'desk';
+  for(const k of ['ios','android','desk'])$('inst-'+k).hidden=k!==sec;
+  $('inst-now').hidden=!bip;
+  $('inst-ios-safari').hidden=!(IOS&&/CriOS|FxiOS|EdgiOS|GSA\//.test(UA));
+  $('inst-store').hidden=!CFG.appStoreUrl;if(CFG.appStoreUrl)$('inst-store').href=CFG.appStoreUrl;
+  $('inst-apk').href=$('inst-apk2').href=APK_URL;
+  $('inst-android-menu').hidden=!!bip;$('inst-desk-menu').hidden=!!bip;
+  if(sec==='desk')drawQR();
+  $('inst').hidden=false}
+$('install').onclick=()=>{closeAll();openInstall()};
+$('inst-close').onclick=()=>{$('inst').hidden=true};
+$('inst-now').onclick=async()=>{if(!bip)return;const p=bip;bip=null;p.prompt();const r=await p.userChoice.catch(()=>null);
+  if(r&&r.outcome==='accepted')$('inst').hidden=true;else openInstall()};
+$('install').hidden=!canInstallUI();
 connect();
 // Versão nova publicada? O navegador pode guardar a página até 10 minutos; compara a data da página
 // carregada com a do servidor e recarrega uma vez se houver versão mais recente.
