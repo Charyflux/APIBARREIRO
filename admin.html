@@ -128,15 +128,15 @@ async function loadReps(){
   for(const r of data)box.append(reportItem(r,false))}
 let users=[];
 async function loadUsers(){
-  const {data,error}=await SB.from('perfis').select('id,nome,criado,bloqueado,admin,reportes(count)').order('criado',{ascending:false}).limit(1000);
+  const {data,error}=await SB.from('perfis').select('id,nome,freguesia,concelho,criado,bloqueado,admin,reportes(count)').order('criado',{ascending:false}).limit(1000);
   if(error){$('usr-list').textContent=t('Erro:')+' '+error.message;return}
   users=data;drawUsers()}
 function drawUsers(){
   const q=$('usr-q').value.trim().toLowerCase();const box=$('usr-list');box.innerHTML='';box.className='';
-  const list=users.filter(u=>!q||u.nome.toLowerCase().includes(q)).slice(0,200);
+  const list=users.filter(u=>!q||(u.nome+' '+(u.freguesia||'')+' '+(u.concelho||'')).toLowerCase().includes(q)).slice(0,200);
   if(!list.length){box.className='muted';box.textContent=t('Ninguém encontrado.');return}
   for(const u of list){const it=el('div','item');const head=el('div','row');
-    head.append(el('strong',null,u.nome),el('span','muted',t('desde {d}',{d:new Date(u.criado).toLocaleDateString(I.locale())})),el('span','tag',t('{n} reportes',{n:(u.reportes&&u.reportes[0]&&u.reportes[0].count)||0})));
+    head.append(el('strong',null,u.nome),el('span','muted',u.freguesia?u.freguesia+', '+u.concelho:t('sem freguesia')),el('span','muted',t('desde {d}',{d:new Date(u.criado).toLocaleDateString(I.locale())})),el('span','tag',t('{n} reportes',{n:(u.reportes&&u.reportes[0]&&u.reportes[0].count)||0})));
     if(u.admin)head.append(el('span','tag','admin'));if(u.bloqueado)head.append(el('span','tag red',t('bloqueado')));
     it.append(head);
     if(u.id!==me){const acts=el('div','row');

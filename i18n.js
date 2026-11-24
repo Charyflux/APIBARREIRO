@@ -40,6 +40,18 @@ const EN={
 'Nome de exibição':'Display name','Ex.: Ana P.':'E.g. Ana P.','Percebi e aceito que este nome apareça nos meus reportes.':'I understand and agree that this name will appear on my reports.',
 'Continuar':'Continue','Confirma o teu telemóvel':'Confirm your mobile number',
 'Enviamos um SMS com um código. O número serve só para confirmar que és uma pessoa real e não aparece a ninguém.':"We'll send you a text message with a code. The number is only used to confirm that you are a real person and is never shown to anyone.",
+'sem freguesia':'no parish','Entrar para reportar':'Sign in to report',
+'Ver o mapa e procurar cidades ou regiões é livre. Para publicar um alerta, diz-nos o teu nome e a tua freguesia.':'Anyone can view the map and search for cities or regions. To post an alert, tell us your name and your parish (freguesia).',
+'O teu nome':'Your name','A tua freguesia':'Your parish (freguesia)','Começa a escrever, ex.: Arroios':'Start typing, e.g. Arroios','Freguesias':'Parishes',
+'Percebi e aceito que o meu nome e a minha freguesia apareçam nos meus reportes.':'I understand and agree that my name and my parish will appear on my reports.',
+'Confirma o teu email':'Confirm your email',
+'Para proteger o mapa de contas falsas, enviamos-te um código por email. Se ainda não tens conta, ela é criada nesse momento. O email nunca aparece a ninguém.':'To protect the map from fake accounts, we\'ll email you a code. If you don\'t have an account yet, it is created at that moment. Your email is never shown to anyone.',
+'Mudar nome ou freguesia':'Change name or parish','Aparece assim nos teus reportes':'This is how you appear on your reports','Guardar':'Save',
+'O nome pode ter até 30 letras.':'The name can have up to 30 characters.','Escolhe a tua freguesia na lista.':'Pick your parish from the list.',
+'A carregar freguesias…':'Loading parishes…','Não deu para carregar a lista de freguesias. Verifica a internet e tenta outra vez.':'Could not load the list of parishes. Check your internet connection and try again.',
+'Não encontrámos essa freguesia. Experimenta outro nome ou o nome do concelho.':'We could not find that parish. Try another name or the name of the municipality.',
+'Concelho de {c}':'Municipality of {c}','Confirma que aceitas que o nome e a freguesia apareçam.':'Please confirm that you agree to your name and parish being shown.',
+'Dados guardados':'Details saved','Olá, {n}! Já podes reportar.':'Hi {n}! You can now report.','Sessão guardada só neste aparelho.':'Session saved on this device only.','Sessão terminada':'Signed out',
 'Número de telemóvel':'Mobile number','Enviar SMS':'Send text message','Código do SMS':'Text message code','Confirmar':'Confirm','Sair':'Log out',
 // ---------- tutorial e localização ----------
 'Bem-vindo à StreetAlert':'Welcome to StreetAlert','Arrasta o mapa':'Drag the map','Marcar uma ocorrência':'Mark an incident',
@@ -127,7 +139,7 @@ const HT={
 'inst-and1':'Tap the browser menu <b>⋮</b>.',
 'inst-and2':'Choose <b>Install app</b> or <b>Add to Home screen</b>.',
 'inst-desk':'In Chrome or Edge, click the install icon in the address bar, or the menu <b>⋮</b> &gt; <b>Install StreetAlert</b>.',
-'g-note':'<b>Your name is visible.</b> It appears next to every point you post and can be seen by anyone who opens the app. You can use just your first name or a nickname. Your email and mobile number are never shown. <a href="privacidade.html" target="_blank" rel="noopener">Privacy policy</a>'
+'g-note':'<b>Your name and your parish are visible.</b> They appear next to every point you post and can be seen by anyone who opens the app. You can use just your first name or a nickname. Your email and mobile number are never shown. <a href="privacidade.html" target="_blank" rel="noopener">Privacy policy</a>'
 };
 const PT={};for(const k in EN)if(!(EN[k] in PT))PT[EN[k]]=k;
 const ptHTML=new Map();
