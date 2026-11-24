@@ -279,6 +279,8 @@ textarea{resize:none;min-height:70px}
 .fsug .empty{padding:10px 12px;font:700 .88rem var(--font);color:var(--muted)}
 .inp.ok{border-color:var(--ok)}
 .hello{display:flex;gap:10px;align-items:center;border-radius:16px;padding:10px 12px;background:var(--card-2);font:800 .95rem/1.35 var(--font)}
+.lockmsg{display:flex;gap:10px;align-items:center;border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--viol,#ff5c8a) 16%,var(--card));color:var(--fg);font:900 .98rem/1.35 var(--font)}
+.lockmsg svg{flex:none}
 .f-lab{margin:0;font:900 .95rem var(--font)}
 .hello small{display:block;font:700 .82rem var(--font);color:var(--muted)}
 .linkbtn{border:0;background:none;color:var(--muted);font:800 .88rem var(--font);text-decoration:underline;cursor:pointer;padding:6px;align-self:center}
@@ -470,7 +472,8 @@ textarea{resize:none;min-height:70px}
     <div class="gate-logo"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg>StreetAlert<button type="button" class="langbtn" data-lang-toggle></button></div>
     <form id="g-name" hidden novalidate>
       <h2 id="g-title">Entrar para reportar</h2>
-      <p class="lead">Ver o mapa e procurar cidades ou regiões é livre. Para publicar um alerta, diz-nos o teu nome e a tua freguesia.</p>
+      <div class="lockmsg" id="g-lock"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg><span>Para reportar, confirmar ou denunciar tens de fazer login.</span></div>
+      <p class="lead">Ver o mapa e procurar cidades ou regiões continua livre, sem login. Para entrar, diz-nos o teu nome e a tua freguesia.</p>
       <label class="f" for="g-nome">O teu nome
         <input class="inp" id="g-nome" maxlength="30" autocomplete="nickname" placeholder="Ex.: Ana P.">
       </label>
