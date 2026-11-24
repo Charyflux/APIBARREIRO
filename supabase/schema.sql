@@ -1,4 +1,4 @@
--- Alerta Portugal: base de dados partilhada (Supabase)
+-- StreetAlert: base de dados partilhada (Supabase)
 -- Cola este ficheiro inteiro em Supabase > SQL Editor > New query e carrega em Run.
 -- Pode correr-se mais do que uma vez sem estragar nada.
 
