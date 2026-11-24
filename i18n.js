@@ -49,7 +49,7 @@ const EN={
 'Descarregar app':'Download app','Instalar a StreetAlert':'Install StreetAlert','Fica com um ícone no ecrã principal e abre como uma app, em ecrã inteiro.':'Get an icon on your home screen and open it like an app, in full screen.',
 'Instalar agora':'Install now','Ver na App Store':'View on the App Store','Descarregar APK para Android':'Download APK for Android',
 'O APK instala-se fora da Google Play: o telemóvel vai pedir para autorizares a instalação de apps desta origem ("fontes desconhecidas").':'The APK installs outside Google Play: your phone will ask you to allow installing apps from this source ("unknown sources").',
-'Aponta a câmara do telemóvel para abrires a StreetAlert lá e a instalares.':'Point your phone camera here to open StreetAlert there and install it.','App instalada!':'App installed!','Copiar link':'Copy link','Link copiado. Abre o Safari e cola-o na barra de endereço.':'Link copied. Open Safari and paste it in the address bar.',
+'Aponta a câmara do telemóvel para abrires a StreetAlert lá e a instalares.':'Point your phone camera here to open StreetAlert there and install it.','App instalada!':'App installed!','Computador':'Computer','Copiar link':'Copy link','Link copiado. Abre o Safari e cola-o na barra de endereço.':'Link copied. Open Safari and paste it in the address bar.',
 'Mostrar o mapa onde estás?':'Show the map where you are?','Agora não':'Not now','Sim, localizar':'Yes, find me',
 'A localização está bloqueada':'Location is blocked','Percebi':'Got it',
 'Abre Definições > StreetAlert > Localização e escolhe "Durante a utilização da app". Depois volta aqui e toca no botão do alvo.':'Open Settings > StreetAlert > Location and choose "While Using the App". Then come back and tap the target button.',
