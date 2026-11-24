@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt">
+<html lang="pt-PT">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -195,6 +195,12 @@ textarea{resize:none;min-height:70px}
 .fakebtn{padding:8px 12px;border-radius:999px;font:900 .8rem var(--font);background:var(--ok);color:#fff}
 .fakebtn.warn{background:transparent;color:var(--viol);box-shadow:inset 0 0 0 2px var(--viol)}
 .round.help{font:900 1.25rem var(--font)}
+.langbtn{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;padding:8px 11px;background:var(--card);color:var(--muted);box-shadow:var(--shadow);font:800 .8rem var(--font);cursor:pointer;white-space:nowrap}
+.langbtn svg{color:var(--fg)}
+.langbtn .on{color:var(--fg);font-weight:900}
+.langbtn:active{transform:scale(.95)}
+.gate-logo .langbtn,.mcard .langbtn{margin-left:auto;box-shadow:none;background:var(--card-2)}
+.mtop{display:flex;justify-content:flex-end;margin:-6px -4px -4px}
 
 .me-dot{width:18px;height:18px;border-radius:50%;background:#2f7bff;border:3px solid #fff;box-shadow:0 0 0 2px rgba(47,123,255,.35),0 2px 6px rgba(0,0,0,.35);box-sizing:border-box}
 @media (prefers-reduced-motion:no-preference){.me-dot{animation:mepulse 2s ease-out infinite}@keyframes mepulse{0%{box-shadow:0 0 0 0 rgba(47,123,255,.55),0 2px 6px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 16px rgba(47,123,255,0),0 2px 6px rgba(0,0,0,.35)}}}
@@ -260,7 +266,7 @@ textarea{resize:none;min-height:70px}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .28s cubic-bezier(.2,1.3,.4,1)}@keyframes up{from{transform:translateY(60px);opacity:.4}}}
 </style>
 
-<div id="map" role="application" aria-label="Mapa de Portugal"></div>
+<div id="map" role="application" aria-label="Mapa de Portugal" translate="no"></div>
 
 <div class="top" id="top">
   <div class="brandrow"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg><b>StreetAlert</b><span class="live" id="live2"><i></i><span id="livetxt2">A ligar</span></span></div>
@@ -269,7 +275,7 @@ textarea{resize:none;min-height:70px}
     <input id="q" type="search" placeholder="Procurar cidade" autocomplete="off" aria-label="Procurar cidade ou vila">
     <span class="live" id="live"><i></i><span id="livetxt">A ligar</span></span>
     <button class="listbtn" id="listbtn" aria-label="Ver reportes recentes" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
-    <div class="results" id="results" hidden></div>
+    <div class="results" id="results" hidden translate="no"></div>
   </div>
   <div class="pills" role="group" aria-label="Filtros">
     <button class="pill" id="f-violencia" aria-pressed="true"><span class="ic" id="pi-v"></span>Violência <span class="n" id="n-violencia">0</span></button>
@@ -280,7 +286,7 @@ textarea{resize:none;min-height:70px}
   </div>
   <div class="recent" id="recent" hidden>
     <h3>Reportes recentes</h3>
-    <div class="rlist" id="rlist"></div>
+    <div class="rlist" id="rlist" translate="no"></div>
   </div>
 </div>
 
@@ -292,6 +298,7 @@ textarea{resize:none;min-height:70px}
   <button class="round" id="locate" aria-label="Centrar em mim" title="Centrar em mim"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg></button>
   <button class="round" id="home" aria-label="Ver Portugal inteiro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M12 2 4 21l8-4 8 4z"/></svg></button>
   <button class="round help" id="help" aria-label="Como usar a app" title="Como usar a app">?</button>
+  <button class="langbtn" id="lang" data-lang-toggle></button>
   <button class="round" id="acct" aria-label="A minha conta" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
 </div>
 
@@ -356,7 +363,7 @@ textarea{resize:none;min-height:70px}
     <div class="grab"></div>
     <div class="d-head"><span class="ic" id="d-ic"></span><div><strong id="d-title"></strong><span id="d-meta"></span></div></div>
     <p class="d-by" id="d-by" hidden></p>
-    <p class="d-desc" id="d-desc"></p>
+    <p class="d-desc" id="d-desc" translate="no"></p>
     <div class="thanks" id="d-thanks"></div>
     <div class="actions">
       <button type="button" class="btn go" id="d-confirm">Também vi isto</button>
@@ -381,7 +388,7 @@ textarea{resize:none;min-height:70px}
   <div class="sheet-in">
     <div class="grab"></div>
     <h2>A minha conta</h2>
-    <p class="lead" id="c-email"></p>
+    <p class="lead" id="c-email" translate="no"></p>
     <div class="err" id="c-blocked" hidden>A tua conta foi bloqueada por um administrador. Podes ver o mapa, mas não podes publicar, confirmar nem denunciar.</div>
     <label class="f" for="c-nome">Nome que aparece nos teus reportes
       <input class="inp" id="c-nome" maxlength="30" autocomplete="nickname">
@@ -401,7 +408,7 @@ textarea{resize:none;min-height:70px}
 <!-- entrada: conta obrigatória -->
 <div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="g-title">
   <div class="gate-card">
-    <div class="gate-logo"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg>StreetAlert</div>
+    <div class="gate-logo"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg>StreetAlert<button type="button" class="langbtn" data-lang-toggle></button></div>
     <div id="g-login">
       <h2 id="g-title">Entrar</h2>
       <p class="lead">Para ver e marcar alertas precisas de uma conta. Cada ponto no mapa mostra o nome de quem o marcou.</p>
@@ -414,7 +421,7 @@ textarea{resize:none;min-height:70px}
     </div>
     <div id="g-code" hidden>
       <h2>Vê o teu email</h2>
-      <p class="lead">Enviámos um código para <b id="g-to"></b>. Escreve-o aqui ou toca no link do email.</p>
+      <p class="lead">Enviámos um código para <b id="g-to" translate="no"></b>. Escreve-o aqui ou toca no link do email.</p>
       <input class="inp" id="g-otp" inputmode="numeric" autocomplete="one-time-code" maxlength="10" placeholder="Código" aria-label="Código do email">
       <button type="button" class="btn go" id="g-verify">Entrar</button>
       <button type="button" class="linkbtn" id="g-back">Usar outro email</button>
@@ -424,7 +431,7 @@ textarea{resize:none;min-height:70px}
       <label class="f" for="g-nome">Nome de exibição
         <input class="inp" id="g-nome" maxlength="30" autocomplete="nickname" placeholder="Ex.: Ana P.">
       </label>
-      <div class="note"><b>O teu nome fica visível.</b> Aparece junto a cada ponto que marcares e pode ser visto por todas as pessoas com conta na app. Podes usar só o primeiro nome ou uma alcunha. O teu email e telemóvel nunca aparecem. <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>
+      <div class="note" data-i18n="g-note"><b>O teu nome fica visível.</b> Aparece junto a cada ponto que marcares e pode ser visto por todas as pessoas com conta na app. Podes usar só o primeiro nome ou uma alcunha. O teu email e telemóvel nunca aparecem. <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>
       <label class="check"><input type="checkbox" id="g-ok"> Percebi e aceito que este nome apareça nos meus reportes.</label>
       <button type="submit" class="btn go" id="g-save" disabled>Continuar</button>
     </form>
@@ -444,22 +451,23 @@ textarea{resize:none;min-height:70px}
 <!-- tutorial do primeiro acesso -->
 <div class="modal" id="tut" hidden role="dialog" aria-modal="true" aria-labelledby="tut-t0">
   <div class="mcard">
+    <div class="mtop"><button type="button" class="langbtn" data-lang-toggle></button></div>
     <div class="slides" id="slides">
       <div class="slide"><div class="mart"><svg width="72" height="72" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg></div>
         <h2 id="tut-t0">Bem-vindo à StreetAlert</h2>
-        <p>Um mapa feito pela comunidade para assinalar <b>violência</b> e <b>mau estacionamento</b> na tua zona. Em 30 segundos mostramos-te como funciona.</p></div>
+        <p data-i18n="tut-p0">Um mapa feito pela comunidade para assinalar <b>violência</b> e <b>mau estacionamento</b> na tua zona. Em 30 segundos mostramos-te como funciona.</p></div>
       <div class="slide"><div class="mart"><div class="mini"><span class="fakefab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><span class="chip">Arrasta o mapa</span><span class="fakebtn">É aqui!</span></div></div>
         <h2>Marcar uma ocorrência</h2>
-        <p>Toca no <b>lápis amarelo</b>, arrasta o mapa até ao sítio certo e carrega em <b>É aqui!</b>. Depois escolhes o tipo, quando foi e, se quiseres, uma descrição curta.</p></div>
+        <p data-i18n="tut-p1">Toca no <b>lápis amarelo</b>, arrasta o mapa até ao sítio certo e carrega em <b>É aqui!</b>. Depois escolhes o tipo, quando foi e, se quiseres, uma descrição curta.</p></div>
       <div class="slide"><div class="mart"><div class="mini" style="flex-direction:column"><span class="chip"><span id="tut-badge"></span>Violência · há 10 min</span><span class="chip">Publicado por <b>Ana</b> a 23/11 às 21:40</span></div></div>
         <h2>Ver o que se passa</h2>
-        <p>Toca num ponto do mapa para ver o que aconteceu, <b>quem publicou</b> e <b>o dia e a hora</b>. O botão de lista, ao lado da pesquisa, mostra os mais recentes.</p></div>
+        <p data-i18n="tut-p2">Toca num ponto do mapa para ver o que aconteceu, <b>quem publicou</b> e <b>o dia e a hora</b>. O botão de lista, ao lado da pesquisa, mostra os mais recentes.</p></div>
       <div class="slide"><div class="mart"><div class="mini"><span class="fakebtn">Também vi isto</span><span class="fakebtn warn">Denunciar</span></div></div>
         <h2>Ajudar a comunidade</h2>
-        <p>Se também viste, carrega em <b>Também vi isto</b>: dá mais confiança ao alerta. Se um alerta for falso ou ofensivo, usa <b>Denunciar</b>. Não escrevas nomes, matrículas nem telefones.</p></div>
+        <p data-i18n="tut-p3">Se também viste, carrega em <b>Também vi isto</b>: dá mais confiança ao alerta. Se um alerta for falso ou ofensivo, usa <b>Denunciar</b>. Não escrevas nomes, matrículas nem telefones.</p></div>
       <div class="slide"><div class="mart"><div class="mini"><span class="chip"><i style="background:#2f6bff"></i>Esquadra</span><span class="chip"><i style="background:#e5484d"></i>Hospital</span><span class="chip"><i style="background:#0d9488"></i>Supermercado</span><span class="chip"><i style="background:#ea580c"></i>Restaurante</span><span class="round" style="width:40px;height:40px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg></span></div></div>
         <h2>Orienta-te no mapa</h2>
-        <p>As bolinhas coloridas são pontos de referência: esquadras, hospitais, escolas, supermercados, restaurantes e mais. O botão com o <b>alvo</b> leva o mapa até onde estás. O <b>?</b> mostra esta ajuda outra vez.</p></div>
+        <p data-i18n="tut-p4">As bolinhas coloridas são pontos de referência: esquadras, hospitais, escolas, supermercados, restaurantes e mais. O botão com o <b>alvo</b> leva o mapa até onde estás. O <b>?</b> mostra esta ajuda outra vez.</p></div>
     </div>
     <div class="dots" id="dots" aria-hidden="true"></div>
     <div class="actions">
@@ -472,10 +480,11 @@ textarea{resize:none;min-height:70px}
 <!-- pedido de localização (antes do pedido do sistema) -->
 <div class="modal" id="askloc" hidden role="dialog" aria-modal="true" aria-labelledby="askloc-t">
   <div class="mcard">
+    <div class="mtop"><button type="button" class="langbtn" data-lang-toggle></button></div>
     <div class="mart"><span class="me-dot" style="transform:scale(2)"></span></div>
     <h2 id="askloc-t">Mostrar o mapa onde estás?</h2>
-    <p>Com a tua localização, o mapa abre logo na tua rua e vês os alertas à tua volta. A localização <b>fica só no teu telemóvel</b>: não é enviada nem guardada por nós.</p>
-    <p style="font-size:.85rem">A seguir, o telemóvel ou o navegador vai pedir autorização. Carrega em <b>Permitir</b>.</p>
+    <p data-i18n="askloc-p0">Com a tua localização, o mapa abre logo na tua rua e vês os alertas à tua volta. A localização <b>fica só no teu telemóvel</b>: não é enviada nem guardada por nós.</p>
+    <p style="font-size:.85rem" data-i18n="askloc-p1">A seguir, o telemóvel ou o navegador vai pedir autorização. Carrega em <b>Permitir</b>.</p>
     <div class="actions">
       <button type="button" class="btn line" id="askloc-no">Agora não</button>
       <button type="button" class="btn go" id="askloc-yes">Sim, localizar</button>
@@ -494,6 +503,7 @@ textarea{resize:none;min-height:70px}
 
 <div class="toast" id="toast" hidden></div>
 
+<script src="i18n.js"></script>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
@@ -506,6 +516,9 @@ textarea{resize:none;min-height:70px}
 const $=id=>document.getElementById(id);
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const safe=(f,fb)=>{try{return f()}catch(e){return fb}};
+const I=window.I18N||{t:(s,v)=>v?s.replace(/\{(\w+)\}/g,(m,k)=>k in v?v[k]:m):s,L:(a)=>a,lang:'pt',onChange(){},locale:()=>'pt-PT'};
+const t=I.t,LG=I.L;
+const catLabel=c=>t(CATS[c].label);
 const CATS={
   violencia:{label:"Violência",c:'--viol',c2:'--viol-2'},
   estacionamento:{label:"Mau estacionamento",c:'--park',c2:'--park-2'}
@@ -578,21 +591,21 @@ function stopWatch(){if(watchId!=null)navigator.geolocation.clearWatch(watchId);
 function isNative(){return !!safe(()=>window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform(),false)}
 function showLocHelp(){
   const ios=/iPhone|iPad|iPod/.test(navigator.userAgent),and=/Android/.test(navigator.userAgent);
-  $('lochelp-txt').textContent=isNative()
+  $('lochelp-txt').textContent=t(isNative()
     ?(ios?'Abre Definições > StreetAlert > Localização e escolhe "Durante a utilização da app". Depois volta aqui e toca no botão do alvo.'
          :'Abre Definições > Apps > StreetAlert > Permissões > Localização e escolhe "Permitir apenas durante a utilização". Depois volta aqui e toca no botão do alvo.')
     :(ios?'No iPhone: Definições > Privacidade e segurança > Serviços de localização > Sites do Safari > "Durante a utilização". Depois recarrega a página e toca no botão do alvo.'
      :and?'No Chrome: toca no ícone à esquerda do endereço do site > Permissões > Localização > Permitir. Depois toca no botão do alvo.'
-         :'Clica no ícone à esquerda do endereço do site, ativa a Localização e recarrega a página. Depois clica no botão do alvo.');
+         :'Clica no ícone à esquerda do endereço do site, ativa a Localização e recarrega a página. Depois clica no botão do alvo.'));
   $('lochelp').hidden=false}
 $('lochelp-ok').onclick=()=>{$('lochelp').hidden=true};
 // Procura a posição: primeiro voo assim que houver resposta, depois afina a precisão durante uns segundos.
 function locateMe(manual){
-  if(!('geolocation' in navigator)){toast('Este aparelho não consegue indicar a localização');return}
+  if(!('geolocation' in navigator)){toast(t('Este aparelho não consegue indicar a localização'));return}
   stopWatch();gotFix=false;$('locate').classList.add('busy');
-  slowT=setTimeout(()=>{if(!gotFix)toast('A procurar a tua localização…')},3000);
+  slowT=setTimeout(()=>{if(!gotFix)toast(t('A procurar a tua localização…'))},3000);
   const ok=p=>{const ll=[p.coords.latitude,p.coords.longitude],acc=p.coords.accuracy||50;
-    if(!PT_BOX.contains(ll)){stopWatch();if(manual||!gotFix)toast('Pareces estar fora de Portugal. O mapa fica em Portugal.');gotFix=true;return}
+    if(!PT_BOX.contains(ll)){stopWatch();if(manual||!gotFix)toast(t('Pareces estar fora de Portugal. O mapa fica em Portugal.'));gotFix=true;return}
     const first=!gotFix;gotFix=true;store2.set(K_LOC,'yes');store2.set(K_LAST,JSON.stringify({lat:+ll[0].toFixed(3),lng:+ll[1].toFixed(3)}));
     drawMe(ll,acc);
     if(first){autoView=false;clearTimeout(slowT);$('locate').classList.remove('busy');
@@ -600,13 +613,13 @@ function locateMe(manual){
     if(acc<=30)stopWatch()};
   const bad=e=>{if(gotFix)return;stopWatch();
     if(e.code===1){store2.set(K_LOC,'denied');showLocHelp()}
-    else toast(e.code===3?'O GPS está a demorar. Tenta outra vez no botão do alvo, de preferência ao ar livre.':'Não foi possível saber onde estás. Podes procurar a tua cidade.')};
+    else toast(t(e.code===3?'O GPS está a demorar. Tenta outra vez no botão do alvo, de preferência ao ar livre.':'Não foi possível saber onde estás. Podes procurar a tua cidade.'))};
   watchId=navigator.geolocation.watchPosition(ok,bad,{enableHighAccuracy:true,timeout:15000,maximumAge:30000});
   watchStop=setTimeout(()=>{if(!gotFix)bad({code:3});stopWatch()},20000);
 }
 $('locate').onclick=()=>{$('askloc').hidden=true;locateMe(true)};
 $('askloc-yes').onclick=()=>{$('askloc').hidden=true;store2.set(K_LOC,'yes');locateMe(false)};
-$('askloc-no').onclick=()=>{$('askloc').hidden=true;store2.set(K_LOC,'no:'+Date.now());toast('Sem problema. Podes usar o botão do alvo quando quiseres.')};
+$('askloc-no').onclick=()=>{$('askloc').hidden=true;store2.set(K_LOC,'no:'+Date.now());toast(t('Sem problema. Podes usar o botão do alvo quando quiseres.'))};
 // Decide se pergunta, localiza logo, ou não faz nada.
 async function startLocation(){
   if(!('geolocation' in navigator))return;
@@ -623,7 +636,7 @@ const SL=()=>[...$('slides').children];
 function tutIndex(){const w=$('slides').clientWidth||1;return Math.round($('slides').scrollLeft/w)}
 function tutPaint(){const i=tutIndex(),n=SL().length;
   [...$('dots').children].forEach((d,k)=>d.classList.toggle('on',k===i));
-  $('tut-next').textContent=i>=n-1?'Começar':'Seguinte';$('tut-skip').style.visibility=i>=n-1?'hidden':''}
+  $('tut-next').textContent=t(i>=n-1?'Começar':'Seguinte');$('tut-skip').style.visibility=i>=n-1?'hidden':''}
 function tutGo(i){$('slides').scrollTo({left:i*$('slides').clientWidth,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
 let tutDone=null;
 function openTutorial(then){
@@ -771,7 +784,8 @@ map.on('zoomend',onZoom);
 
 // ---------- store ----------
 let reports=[],me=null,db=null,fresh=new Set();const LS='alerta-pt-v1';
-const live=(t,on)=>{for(const k of ['','2']){$('livetxt'+k).textContent=t;$('live'+k).classList.toggle('on',!!on)}};
+let liveNow=['A ligar',false];
+const live=(s,on)=>{liveNow=[s,on];for(const k of ['','2']){$('livetxt'+k).textContent=t(s);$('live'+k).classList.toggle('on',!!on)}};
 function saveLocal(){safe(()=>localStorage.setItem(LS,JSON.stringify(reports)))}
 // Base de dados partilhada (Supabase). Sem config.js preenchido, tudo fica neste aparelho como antes.
 const CFG=window.ALERTA_CONFIG||{};
@@ -795,7 +809,7 @@ const store={
 };
 async function connect(){
   if(WANT_SB){
-    if(!SB){gate('login');gerr('Não foi possível ligar ao servidor. Verifica a internet e recarrega a página.');$('g-send').disabled=true;live('Sem ligação');return}
+    if(!SB){gate('login');gerr(t('Não foi possível ligar ao servidor. Verifica a internet e recarrega a página.'));$('g-send').disabled=true;live('Sem ligação');return}
     live('A ligar');
     $('g-google').hidden=$('g-or').hidden=!(CFG.google&&!NATIVE);
     SB.auth.onAuthStateChange((ev,s)=>{setTimeout(()=>onAuth(ev,s),0)});
@@ -819,17 +833,17 @@ function gate(step){
 function gerr(t){$('g-err').textContent=t;$('g-err').hidden=false}
 function errMsg(e){const m=String((e&&(e.message||e.error_description||e.msg))||'');
   const lim=m.match(/limite_diario:(\d+)/);
-  if(lim)return `Chegaste ao limite de ${lim[1]} ${lim[1]==='1'?'reporte':'reportes'} por dia. Tenta outra vez amanhã.`;
-  if(/data_invalida/.test(m))return 'A data tem de estar nos últimos 30 dias.';
-  if(/duplicate key/.test(m))return 'Já tinhas feito isto antes.';
+  if(lim)return lim[1]==='1'?t('Chegaste ao limite de 1 reporte por dia. Tenta outra vez amanhã.'):t('Chegaste ao limite de {n} reportes por dia. Tenta outra vez amanhã.',{n:lim[1]});
+  if(/data_invalida/.test(m))return t('A data tem de estar nos últimos 30 dias.');
+  if(/duplicate key/.test(m))return t('Já tinhas feito isto antes.');
   if(/row-level security|permission denied/.test(m)){
-    if(perfil&&perfil.bloqueado)return 'A tua conta está bloqueada.';
-    if(defs.exigir_telemovel&&!(session&&session.user.phone_confirmed_at))return 'Confirma primeiro o teu telemóvel.';
-    return 'Não tens permissão para fazer isto.'}
-  if(/rate limit|security purposes|too many/i.test(m))return 'Muitos pedidos seguidos. Espera um minuto e tenta outra vez.';
-  if(/expired|invalid|token/i.test(m))return 'Código errado ou expirado. Pede outro.';
-  if(/fetch|network/i.test(m))return 'Sem ligação à internet. Tenta outra vez.';
-  return 'Algo correu mal. Tenta outra vez.'}
+    if(perfil&&perfil.bloqueado)return t('A tua conta está bloqueada.');
+    if(defs.exigir_telemovel&&!(session&&session.user.phone_confirmed_at))return t('Confirma primeiro o teu telemóvel.');
+    return t('Não tens permissão para fazer isto.')}
+  if(/rate limit|security purposes|too many/i.test(m))return t('Muitos pedidos seguidos. Espera um minuto e tenta outra vez.');
+  if(/expired|invalid|token/i.test(m))return t('Código errado ou expirado. Pede outro.');
+  if(/fetch|network/i.test(m))return t('Sem ligação à internet. Tenta outra vez.');
+  return t('Algo correu mal. Tenta outra vez.')}
 async function busy(btn,fn){btn.disabled=true;try{await fn()}finally{btn.disabled=false}}
 function onAuth(ev,s){
   if(!s){session=null;me=null;perfil=null;stopLive();reports=[];render();closeAll();$('acct').hidden=true;gate('login');live('Sem sessão');return}
@@ -847,23 +861,23 @@ async function afterLogin(){
   gate(null);$('acct').hidden=false;startLive();onboard();
 }
 const cleanName=v=>v.replace(/\s+/g,' ').trim();
-function nameIssue(n){if(n.length<2)return 'O nome precisa de pelo menos 2 letras.';if(/[@<>]|https?:|www\./i.test(n))return 'Usa só um nome, sem emails nem links.';return null}
+function nameIssue(n){if(n.length<2)return t('O nome precisa de pelo menos 2 letras.');if(/[@<>]|https?:|www\./i.test(n))return t('Usa só um nome, sem emails nem links.');return null}
 function checkName(){const n=cleanName($('g-nome').value);$('g-save').disabled=!!nameIssue(n)||!$('g-ok').checked}
 $('g-nome').oninput=checkName;$('g-ok').onchange=checkName;
 $('g-send').onclick=()=>busy($('g-send'),async()=>{const e=$('g-email').value.trim();
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return gerr('Escreve um email válido.');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return gerr(t('Escreve um email válido.'));
   const {error}=await SB.auth.signInWithOtp({email:e,options:{shouldCreateUser:true,emailRedirectTo:NATIVE?undefined:location.origin+location.pathname}});
   if(error)return gerr(errMsg(error));$('g-to').textContent=e;$('g-otp').value='';gate('code');$('g-otp').focus()});
 $('g-email').onkeydown=e=>{if(e.key==='Enter')$('g-send').click()};
-$('g-verify').onclick=()=>busy($('g-verify'),async()=>{const t=$('g-otp').value.replace(/\s/g,'');if(!t)return gerr('Escreve o código que recebeste.');
-  const {error}=await SB.auth.verifyOtp({email:$('g-to').textContent,token:t,type:'email'});if(error)gerr(errMsg(error))});
+$('g-verify').onclick=()=>busy($('g-verify'),async()=>{const code=$('g-otp').value.replace(/\s/g,'');if(!code)return gerr(t('Escreve o código que recebeste.'));
+  const {error}=await SB.auth.verifyOtp({email:$('g-to').textContent,token:code,type:'email'});if(error)gerr(errMsg(error))});
 $('g-otp').onkeydown=e=>{if(e.key==='Enter')$('g-verify').click()};
 $('g-back').onclick=()=>gate('login');
 $('g-google').onclick=()=>SB.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}}).then(({error})=>{if(error)gerr(errMsg(error))});
 $('g-name').addEventListener('submit',e=>{e.preventDefault();const n=cleanName($('g-nome').value);const issue=nameIssue(n);if(issue)return gerr(issue);
   busy($('g-save'),async()=>{const {error}=await SB.from('perfis').insert({id:me,nome:n});if(error)return gerr(errMsg(error));await afterLogin()})});
 const e164=t=>{t=t.replace(/[\s.()-]/g,'');if(/^9\d{8}$/.test(t))return '+351'+t;if(/^00\d+$/.test(t))return '+'+t.slice(2);return t};
-$('g-tel-send').onclick=()=>busy($('g-tel-send'),async()=>{const ph=e164($('g-tel').value);if(!/^\+\d{9,15}$/.test(ph))return gerr('Escreve um número válido, por exemplo 912 345 678.');
+$('g-tel-send').onclick=()=>busy($('g-tel-send'),async()=>{const ph=e164($('g-tel').value);if(!/^\+\d{9,15}$/.test(ph))return gerr(t('Escreve um número válido, por exemplo 912 345 678.'));
   const {error}=await SB.auth.updateUser({phone:ph});if(error)return gerr(errMsg(error));$('g-err').hidden=true;$('g-sms').hidden=$('g-tel-verify').hidden=false;$('g-sms').focus()});
 $('g-tel-verify').onclick=()=>busy($('g-tel-verify'),async()=>{const {data,error}=await SB.auth.verifyOtp({phone:e164($('g-tel').value),token:$('g-sms').value.replace(/\s/g,''),type:'phone_change'});
   if(error)return gerr(errMsg(error));if(data&&data.user)session={...session,user:data.user};await afterLogin()});
@@ -875,7 +889,7 @@ async function loadReports(){
   const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,criado,user_id,oculto,perfis(nome),confirmacoes(user_id)').gte('quando',since).order('quando',{ascending:false}).limit(3000);
   if(error){live('Erro');return}
   reports=data.filter(x=>!x.oculto||x.user_id===me).map(x=>({id:x.id,cat:x.cat,lat:x.lat,lng:x.lng,descricao:x.descricao,quando:x.quando,criado:x.criado,autor:x.user_id,
-    autorNome:(x.perfis&&x.perfis.nome)||'Utilizador',oculto:x.oculto,confirmacoes:Object.fromEntries((x.confirmacoes||[]).map(c=>[c.user_id,true]))}));
+    autorNome:(x.perfis&&x.perfis.nome)||t('Utilizador'),oculto:x.oculto,confirmacoes:Object.fromEntries((x.confirmacoes||[]).map(c=>[c.user_id,true]))}));
   live('Ao vivo',true);render();
   if(current&&!$('s-detail').hidden){const c=reports.find(r=>r.id===current.id);if(c)showDetail(c,true);else closeAll()}
 }
@@ -891,16 +905,16 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&started)q
 // ---------- a minha conta ----------
 $('acct').onclick=()=>{closeAll();if(!perfil)return;
   $('c-email').textContent=session.user.email||session.user.phone||'';$('c-nome').value=perfil.nome;$('c-err').hidden=true;
-  $('c-blocked').hidden=!perfil.bloqueado;$('c-admin').hidden=!perfil.admin;$('c-del').dataset.c='';$('c-del').textContent='Apagar a minha conta';
+  $('c-blocked').hidden=!perfil.bloqueado;$('c-admin').hidden=!perfil.admin;$('c-del').dataset.c='';$('c-del').textContent=t('Apagar a minha conta');
   $('s-conta').hidden=false;setUI('sheet')};
 $('c-close').onclick=closeAll;
 $('c-save').onclick=()=>busy($('c-save'),async()=>{const n=cleanName($('c-nome').value);const issue=nameIssue(n);
   if(issue){$('c-err').textContent=issue;$('c-err').hidden=false;return}
   const {error}=await SB.from('perfis').update({nome:n}).eq('id',me);if(error){$('c-err').textContent=errMsg(error);$('c-err').hidden=false;return}
-  perfil.nome=n;for(const r of reports)if(r.autor===me)r.autorNome=n;closeAll();render();toast('Nome guardado')});
+  perfil.nome=n;for(const r of reports)if(r.autor===me)r.autorNome=n;closeAll();render();toast(t('Nome guardado'))});
 $('c-out').onclick=()=>SB.auth.signOut();
-$('c-del').onclick=()=>{const b=$('c-del');if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Toca outra vez: apaga a conta e todos os teus reportes';return}
-  busy(b,async()=>{const {error}=await SB.rpc('apagar_conta');if(error){toast(errMsg(error));return}await SB.auth.signOut();toast('Conta apagada')})};
+$('c-del').onclick=()=>{const b=$('c-del');if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent=t('Toca outra vez: apaga a conta e todos os teus reportes');return}
+  busy(b,async()=>{const {error}=await SB.rpc('apagar_conta');if(error){toast(errMsg(error));return}await SB.auth.signOut();toast(t('Conta apagada'))})};
 
 // ---------- fun ----------
 function confetti(cat){
@@ -927,7 +941,7 @@ function render(){
   for(const r of reports){
     if(!CATS[r.cat]||typeof r.lat!=='number'||typeof r.lng!=='number'||!inPeriod(r))continue;
     n[r.cat]++;if(!active[r.cat])continue;
-    list.push(L.marker([r.lat,r.lng],{icon:pinIcon(r),cat:r.cat,title:CATS[r.cat].label,riseOnHover:true}).on('click',e=>{L.DomEvent.stop(e);showDetail(r)}));
+    list.push(L.marker([r.lat,r.lng],{icon:pinIcon(r),cat:r.cat,title:catLabel(r.cat),riseOnHover:true}).on('click',e=>{L.DomEvent.stop(e);showDetail(r)}));
   }
   cluster.addLayers(list);
   renderList();
@@ -937,12 +951,12 @@ function render(){
 function renderList(){
   const box=$('rlist');box.innerHTML='';
   const items=reports.filter(r=>CATS[r.cat]&&active[r.cat]&&inPeriod(r)).sort((a,b)=>new Date(b.quando)-new Date(a.quando)).slice(0,40);
-  if(!items.length){box.innerHTML='<div class="rempty">Ainda não há reportes neste período. Toca no lápis amarelo para criar o primeiro.</div>';return}
+  if(!items.length){box.innerHTML='<div class="rempty"></div>';box.firstChild.textContent=t('Ainda não há reportes neste período. Toca no lápis amarelo para criar o primeiro.');return}
   for(const r of items){const b=document.createElement('button');b.className='ritem';
     b.innerHTML=`<span class="ic">${badge(r.cat,34)}</span><span><strong></strong><p></p><small></small></span>`;
-    b.querySelector('strong').textContent=CATS[r.cat].label;
+    b.querySelector('strong').textContent=catLabel(r.cat);
     const p=b.querySelector('p');if(r.descricao)p.textContent=r.descricao;else p.remove();
-    b.querySelector('small').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'')+(r.autorNome?' · por '+r.autorNome:'')+(posted(r.criado||r.quando)?(r.autorNome?' a ':' · publicado a ')+posted(r.criado||r.quando):'');
+    b.querySelector('small').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'')+(r.autorNome?LG(' · por ',' · by ')+r.autorNome:'')+(posted(r.criado||r.quando)?(r.autorNome?LG(' a ',' on '):LG(' · publicado a ',' · posted on '))+posted(r.criado||r.quando):'');
     b.onclick=()=>{if(window.innerWidth<760)toggleList(false);map.flyTo([r.lat,r.lng],Math.max(map.getZoom(),13),{duration:.8});showDetail(r,false,true)};
     box.append(b)}
 }
@@ -956,9 +970,9 @@ const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 let sel=-1,hits=[];
 function showResults(){
   const q=norm($('q').value.trim());const box=$('results');
-  if(!q){box.innerHTML='<div class="quick"><button data-go="pt">Continente</button><button data-go="ma">Madeira</button><button data-go="az">Açores</button><button data-go="lx">Lisboa</button><button data-go="po">Porto</button></div>';box.hidden=false;hits=[];return}
+  if(!q){box.innerHTML='<div class="quick">'+[['pt','Continente'],['ma','Madeira'],['az','Açores'],['lx','Lisboa'],['po','Porto']].map(([k,n])=>`<button data-go="${k}">${t(n)}</button>`).join('')+'</div>';box.hidden=false;hits=[];return}
   hits=cities.filter(c=>norm(c.n).includes(q)).sort((a,b)=>(norm(b.n).startsWith(q)-norm(a.n).startsWith(q))||a.t-b.t||b.p-a.p).slice(0,7);
-  box.innerHTML=hits.length?hits.map((c,i)=>`<button data-i="${i}" class="${i===sel?'sel':''}"><span></span><small>${c.p>=1000?Math.round(c.p/1000)+' mil hab.':''}</small></button>`).join(''):'<div class="quick" style="color:var(--muted);font-weight:700">Sem resultados</div>';
+  box.innerHTML=hits.length?hits.map((c,i)=>`<button data-i="${i}" class="${i===sel?'sel':''}"><span></span><small>${c.p>=1000?t('{n} mil hab.',{n:Math.round(c.p/1000)}):''}</small></button>`).join(''):'<div class="quick" style="color:var(--muted);font-weight:700">'+t('Sem resultados')+'</div>';
   box.querySelectorAll('button[data-i]').forEach(b=>b.firstChild.textContent=hits[+b.dataset.i].n);
   box.hidden=false;
 }
@@ -977,7 +991,7 @@ $('results').addEventListener('click',e=>{const b=e.target.closest('button');if(
 $('q').addEventListener('blur',()=>setTimeout(()=>$('results').hidden=true,100));
 
 function nearest(lat,lng){let best=null,bd=1e9;for(const c of cities){if(c.t===3&&c.p<8000)continue;const d=(c.lat-lat)**2+((c.lng-lng)*Math.cos(lat*Math.PI/180))**2;if(d<bd){bd=d;best=c}}
-  if(!best)return '';const km=Math.sqrt(bd)*111;return km<2?'em '+best.n:'a '+Math.round(km)+' km de '+best.n}
+  if(!best)return '';const km=Math.sqrt(bd)*111;return km<2?t('em {x}',{x:best.n}):t('a {n} km de {x}',{n:Math.round(km),x:best.n})}
 
 // ---------- report flow ----------
 let draft=null,draftCat=null,current=null;
@@ -988,7 +1002,7 @@ function setUI(mode){
   $('top').style.visibility=mode==='aim'?'hidden':'';
 }
 function closeAll(){['s-cat','s-form','s-detail','s-conta'].forEach(i=>$(i).hidden=true);$('d-flagbox').hidden=true;draftMarker.remove();current=null;setUI('idle')}
-$('fab').onclick=()=>{closeAll();if(SB&&perfil&&perfil.bloqueado){toast('A tua conta está bloqueada');return}if(map.getZoom()<12)map.setZoom(12);setUI('aim')};
+$('fab').onclick=()=>{closeAll();if(SB&&perfil&&perfil.bloqueado){toast(t('A tua conta está bloqueada'));return}if(map.getZoom()<12)map.setZoom(12);setUI('aim')};
 $('place-cancel').onclick=closeAll;
 $('place-ok').onclick=()=>{const c=map.getCenter();startReport(c)};
 map.on('click',e=>{if(!$('placebar').hidden)return;if(SB&&(!perfil||perfil.bloqueado))return;startReport(e.latlng)});
@@ -996,13 +1010,13 @@ function startReport(ll){
   closeAll();
   draft={lat:+ll.lat.toFixed(4),lng:+ll.lng.toFixed(4)};
   draftMarker.setLatLng(ll).setIcon(L.divIcon({className:'',html:`<div class="pin new" style="--c:${css('--sun')}">${aimSvg()}</div>`,iconSize:[54,68],iconAnchor:[27,66]})).addTo(map);
-  $('cat-where').textContent=cities.length?('Local '+nearest(draft.lat,draft.lng)):'';
+  $('cat-where').textContent=cities.length?t('Local {x}',{x:nearest(draft.lat,draft.lng)}):'';
   $('s-cat').hidden=false;setUI('sheet');
 }
 $('cat-cancel').onclick=closeAll;$('form-cancel').onclick=closeAll;
 document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{draftCat=b.dataset.cat;
-  $('ch-ic').innerHTML=badge(draftCat,36);$('ch-name').textContent=CATS[draftCat].label;
-  $('s-cat').hidden=true;$('s-form').hidden=false;setWhen(0);$('f-who').hidden=!(SB&&perfil);if(SB&&perfil){$('f-who').textContent='';const wb=document.createElement('b');wb.textContent=perfil.nome;$('f-who').append('Vai aparecer como publicado por ',wb,'.')}$('desc').value='';$('count').textContent='0 / 140';validate()});
+  $('ch-ic').innerHTML=badge(draftCat,36);$('ch-name').textContent=catLabel(draftCat);
+  $('s-cat').hidden=true;$('s-form').hidden=false;setWhen(0);$('f-who').hidden=!(SB&&perfil);if(SB&&perfil){$('f-who').textContent='';const wb=document.createElement('b');wb.textContent=perfil.nome;$('f-who').append(t('Vai aparecer como publicado por')+' ',wb,'.')}$('desc').value='';$('count').textContent='0 / 140';validate()});
 $('ch-change').onclick=()=>{$('s-form').hidden=true;$('s-cat').hidden=false};
 function nowLocal(off){const d=new Date(Date.now()-(off||0)*6e4);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
 function setWhen(min){
@@ -1016,14 +1030,14 @@ $('when').oninput=validate;
 // GDPR guard: block plates, contacts and personal names.
 const FIRST=new Set('maria joao jose ana antonio manuel francisco pedro paulo carlos luis rui miguel tiago bruno ricardo andre nuno sergio jorge fernando diogo goncalo rafael hugo vitor daniel filipe marco joana ines sofia rita catarina marta beatriz carla sandra patricia teresa helena cristina susana mariana leonor sara raquel diana filipa vera isabel fatima margarida lucas mateus martim duarte tomas santiago afonso'.split(' '));
 const PLACE=/^(rua|r\.|av\.?|avenida|praca|largo|travessa|tv\.|calcada|estrada|beco|escadinhas|alameda|parque|jardim|escola|igreja|santa|santo|sao|s\.|dom|dona|d\.|cais|mercado|bairro|quinta|hospital|estacao|metro|ponte|colegio|liceu|centro)$/;
-function privacyIssue(t){
-  if(/\b([A-Z]{2}[\s.\-]?\d{2}[\s.\-]?\d{2}|\d{2}[\s.\-]?[A-Z]{2}[\s.\-]?\d{2}|\d{2}[\s.\-]?\d{2}[\s.\-]?[A-Z]{2}|[A-Z]{2}[\s.\-]?\d{2}[\s.\-]?[A-Z]{2})\b/i.test(t))return 'Parece haver uma matrícula. Tira-a do texto, por favor: não publicamos matrículas.';
-  if(/[\w.+-]+@[\w-]+\.[\w.]+/.test(t))return 'Tira o e-mail do texto.';
-  if(/(\+?351)?[\s.-]?\b(9[1236]\d|2\d{2})[\s.-]?\d{3}[\s.-]?\d{3}\b/.test(t))return 'Tira o número de telefone do texto.';
-  const w=t.split(/\s+/).map(x=>norm(x.replace(/[^\p{L}.]/gu,'')));
+function privacyIssue(x){
+  if(/\b([A-Z]{2}[\s.\-]?\d{2}[\s.\-]?\d{2}|\d{2}[\s.\-]?[A-Z]{2}[\s.\-]?\d{2}|\d{2}[\s.\-]?\d{2}[\s.\-]?[A-Z]{2}|[A-Z]{2}[\s.\-]?\d{2}[\s.\-]?[A-Z]{2})\b/i.test(x))return t('Parece haver uma matrícula. Tira-a do texto, por favor: não publicamos matrículas.');
+  if(/[\w.+-]+@[\w-]+\.[\w.]+/.test(x))return t('Tira o e-mail do texto.');
+  if(/(\+?351)?[\s.-]?\b(9[1236]\d|2\d{2})[\s.-]?\d{3}[\s.-]?\d{3}\b/.test(x))return t('Tira o número de telefone do texto.');
+  const w=x.split(/\s+/).map(x=>norm(x.replace(/[^\p{L}.]/gu,'')));
   for(let i=0;i<w.length;i++){const x=w[i].replace(/\./g,'');if(!FIRST.has(x))continue;
     let p=w[i-1]||'';if(/^(de|da|do|dos|das)$/.test(p))p=w[i-2]||'';
-    if(!PLACE.test(p))return 'Parece haver um nome de pessoa. Descreve a situação sem identificar ninguém. Nomes de ruas, como "Rua Maria Pia", podem ficar.'}
+    if(!PLACE.test(p))return t('Parece haver um nome de pessoa. Descreve a situação sem identificar ninguém. Nomes de ruas, como "Rua Maria Pia", podem ficar.')}
   return null;
 }
 function validate(){
@@ -1037,44 +1051,53 @@ $('s-form').addEventListener('submit',async e=>{
   try{const id=await store.add(r);fresh.add(id);
     if(!active[r.cat]){active[r.cat]=true;$('f-'+r.cat).setAttribute('aria-pressed','true')}
     if(+$('period').value===1&&Date.now()-new Date(r.quando)>864e5)$('period').value='7';
-    closeAll();render();confetti(r.cat);toast('Obrigado! Já está no mapa')}
-  catch(err){$('err').hidden=false;$('err').textContent=SB?errMsg(err):'Não deu para publicar. Confirma que tens sessão iniciada e tenta outra vez.';$('save').disabled=false}
+    closeAll();render();confetti(r.cat);toast(t('Obrigado! Já está no mapa'))}
+  catch(err){$('err').hidden=false;$('err').textContent=SB?errMsg(err):t('Não deu para publicar. Confirma que tens sessão iniciada e tenta outra vez.');$('save').disabled=false}
 });
 
 // ---------- detail ----------
-const FMT_D=new Intl.DateTimeFormat('pt-PT',{timeZone:'Europe/Lisbon',day:'2-digit',month:'2-digit',year:'numeric'}),FMT_H=new Intl.DateTimeFormat('pt-PT',{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit',hour12:false});
-function posted(iso){const d=new Date(iso);if(isNaN(d))return '';return FMT_D.format(d)+' às '+FMT_H.format(d)}
-function ago(iso){const m=Math.round((Date.now()-new Date(iso))/6e4);if(m<1)return 'agora mesmo';if(m<60)return 'há '+m+' min';const h=Math.round(m/60);if(h<24)return 'há '+h+' h';const d=Math.round(h/24);return d===1?'ontem':'há '+d+' dias'}
+const FMT={};
+function fmt(){const l=I.locale();return FMT[l]||(FMT[l]={d:new Intl.DateTimeFormat(l,{timeZone:'Europe/Lisbon',day:'2-digit',month:'2-digit',year:'numeric'}),h:new Intl.DateTimeFormat(l,{timeZone:'Europe/Lisbon',hour:'2-digit',minute:'2-digit',hour12:false})})}
+function posted(iso){const d=new Date(iso);if(isNaN(d))return '';const f=fmt();return f.d.format(d)+LG(' às ',' at ')+f.h.format(d)}
+function ago(iso){const m=Math.round((Date.now()-new Date(iso))/6e4);if(m<1)return t('agora mesmo');if(m<60)return t('há {n} min',{n:m});const h=Math.round(m/60);if(h<24)return t('há {n} h',{n:h});const d=Math.round(h/24);return d===1?t('ontem'):t('há {n} dias',{n:d})}
 function showDetail(r,keep,nopan){
   if(!keep){closeAll();if(!nopan)map.panTo([r.lat,r.lng])}
   current=r;
-  $('d-ic').innerHTML=badge(r.cat,52);$('d-title').textContent=CATS[r.cat].label;
+  $('d-ic').innerHTML=badge(r.cat,52);$('d-title').textContent=catLabel(r.cat);
   $('d-meta').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'');
-  $('d-desc').textContent=r.descricao||'Sem descrição.';$('d-desc').classList.toggle('empty',!r.descricao);
+  $('d-desc').textContent=r.descricao||t('Sem descrição.');$('d-desc').classList.toggle('empty',!r.descricao);
   const conf=Object.keys(r.confirmacoes||{}).filter(k=>r.confirmacoes[k]);const mine=conf.includes(me||'local');
   $('d-thanks').innerHTML='';const b=document.createElement('b');b.textContent=conf.length;
-  $('d-thanks').append(b,conf.length===1?' pessoa também viu isto':' pessoas também viram isto');
-  $('d-confirm').disabled=mine||r.autor===(me||'local');$('d-confirm').textContent=mine?'Já confirmaste':'Também vi isto';
+  $('d-thanks').append(b,t(conf.length===1?'pessoa também viu isto':'pessoas também viram isto'));
+  $('d-confirm').disabled=mine||r.autor===(me||'local');$('d-confirm').textContent=t(mine?'Já confirmaste':'Também vi isto');
   const own=r.autor===(me||'local');
-  $('d-del').hidden=!(own||(SB&&perfil&&perfil.admin));$('d-del').dataset.c='';$('d-del').textContent=own?'Apagar o meu reporte':'Apagar (administrador)';
+  $('d-del').hidden=!(own||(SB&&perfil&&perfil.admin));$('d-del').dataset.c='';$('d-del').textContent=t(own?'Apagar o meu reporte':'Apagar (administrador)');
   const pq=posted(r.criado||r.quando);$('d-by').hidden=!(r.autorNome||pq);$('d-by').textContent='';
-  if(r.autorNome){const nb=document.createElement('b');nb.textContent=r.autorNome;$('d-by').append('Publicado por ',nb,own?' (tu)':'')}
-  if(pq){const tb=document.createElement('b');tb.textContent=pq;$('d-by').append(r.autorNome?' a ':'Publicado a ',tb)}
-  if(r.oculto)$('d-by').append(' · escondido após denúncias, à espera de revisão');
+  if(r.autorNome){const nb=document.createElement('b');nb.textContent=r.autorNome;$('d-by').append(t('Publicado por')+' ',nb,own?' '+t('(tu)'):'')}
+  if(pq){const tb=document.createElement('b');tb.textContent=pq;$('d-by').append(r.autorNome?LG(' a ',' on '):LG('Publicado a ','Posted on '),tb)}
+  if(r.oculto)$('d-by').append(' · '+t('escondido após denúncias, à espera de revisão'));
   $('d-flag').hidden=!(SB&&!own);$('d-flagbox').hidden=true;
   $('s-detail').hidden=false;setUI('sheet');
 }
 $('d-close').onclick=closeAll;
-$('d-confirm').onclick=async()=>{if(!current)return;$('d-confirm').disabled=true;try{await store.confirm(current);toast('Obrigado pela confirmação')}catch(e){$('d-confirm').disabled=false;toast(SB?errMsg(e):'Não deu para confirmar')}};
+$('d-confirm').onclick=async()=>{if(!current)return;$('d-confirm').disabled=true;try{await store.confirm(current);toast(t('Obrigado pela confirmação'))}catch(e){$('d-confirm').disabled=false;toast(SB?errMsg(e):t('Não deu para confirmar'))}};
 $('d-flag').onclick=()=>{$('d-flagbox').hidden=!$('d-flagbox').hidden};
 document.querySelectorAll('[data-motivo]').forEach(b=>b.onclick=async()=>{if(!current)return;const r=current;
   document.querySelectorAll('[data-motivo]').forEach(x=>x.disabled=true);
-  try{await store.flag(r,b.dataset.motivo);$('d-flagbox').hidden=true;$('d-flag').hidden=true;toast('Obrigado. Um administrador vai rever')}
+  try{await store.flag(r,b.dataset.motivo);$('d-flagbox').hidden=true;$('d-flag').hidden=true;toast(t('Obrigado. Um administrador vai rever'))}
   catch(e){toast(errMsg(e))}finally{document.querySelectorAll('[data-motivo]').forEach(x=>x.disabled=false)}});
-$('d-del').onclick=async()=>{const b=$('d-del');if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Toca outra vez para apagar';return}
-  b.dataset.c='';try{await store.remove(current.id);closeAll();toast('Reporte apagado')}catch(e){toast('Não deu para apagar')}};
+$('d-del').onclick=async()=>{const b=$('d-del');if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent=t('Toca outra vez para apagar');return}
+  b.dataset.c='';try{await store.remove(current.id);closeAll();toast(t('Reporte apagado'))}catch(e){toast(t('Não deu para apagar'))}};
 function toast(t){$('toast').textContent=t;$('toast').hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').hidden=true,2600)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.activeElement!==$('q'))closeAll()});
+// Mudar de idioma: os textos fixos são trocados pelo i18n.js; aqui refazem-se os que o código escreve.
+I.onChange(()=>{live(liveNow[0],liveNow[1]);render();if(!$('tut').hidden)tutPaint();
+  if(current&&!$('s-detail').hidden)showDetail(current,true);
+  if(!$('s-form').hidden&&draftCat){$('ch-name').textContent=catLabel(draftCat);validate()}
+  if(!$('s-cat').hidden&&draft)$('cat-where').textContent=cities.length?t('Local {x}',{x:nearest(draft.lat,draft.lng)}):'';
+  if(!$('results').hidden)showResults();
+  if(!$('lochelp').hidden)showLocHelp();
+  if(!$('s-conta').hidden&&$('c-del').dataset.c!=='1')$('c-del').textContent=t('Apagar a minha conta')});
 connect();
 // Versão nova publicada? O navegador pode guardar a página até 10 minutos; compara a data da página
 // carregada com a do servidor e recarrega uma vez se houver versão mais recente.

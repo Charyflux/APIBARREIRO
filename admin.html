@@ -34,11 +34,13 @@ input[type=search]{width:100%}
 input[type=number]{width:90px}
 label.set{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:2px solid var(--line)}
 label.set:first-of-type{border-top:0}
+.langbtn{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;padding:8px 11px;background:var(--card);color:var(--muted);font:800 .8rem var(--font);cursor:pointer}
+.langbtn svg{color:var(--fg)}.langbtn .on{color:var(--fg);font-weight:900}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:900}
 </style>
 </head>
 <body><main>
-<p><a href="./">← Voltar ao mapa</a></p>
+<p style="display:flex;align-items:center;justify-content:space-between;gap:10px"><a href="./">← Voltar ao mapa</a><button type="button" class="langbtn" data-lang-toggle></button></p>
 <h1>Administração</h1>
 <p class="muted" id="who">A verificar a tua sessão…</p>
 
@@ -68,89 +70,92 @@ label.set:first-of-type{border-top:0}
 </div>
 <div class="toast" id="toast" hidden></div>
 </main>
+<script src="i18n.js"></script>
 <script src="config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 (()=>{
 const $=id=>document.getElementById(id);
+const I=window.I18N||{t:(s,v)=>v?s.replace(/\{(\w+)\}/g,(m,k)=>k in v?v[k]:m):s,onChange(){},locale:()=>'pt-PT'};const t=I.t;
+I.onChange(()=>location.reload());
 const CFG=window.ALERTA_CONFIG||{};
-const CATS={violencia:'Violência',estacionamento:'Mau estacionamento'};
+const CATS={violencia:t('Violência'),estacionamento:t('Mau estacionamento')};
 function toast(t){$('toast').textContent=t;$('toast').hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').hidden=true,2600)}
 function deny(t){$('who').hidden=true;$('noaccess').hidden=false;if(t)$('noaccess-msg').textContent=t}
 const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e};
 const btn=(text,cls,fn)=>{const b=el('button','btn '+(cls||''),text);b.onclick=async()=>{b.disabled=true;try{await fn(b)}finally{b.disabled=false}};return b};
-const when=iso=>new Date(iso).toLocaleString('pt-PT',{dateStyle:'short',timeStyle:'short'});
-if(!(CFG.supabaseUrl&&CFG.supabaseAnonKey)){deny('A base de dados ainda não está configurada (config.js).');return}
-if(!window.supabase){deny('Não foi possível ligar ao servidor.');return}
+const when=iso=>new Date(iso).toLocaleString(I.locale(),{dateStyle:'short',timeStyle:'short'});
+if(!(CFG.supabaseUrl&&CFG.supabaseAnonKey)){deny(t('A base de dados ainda não está configurada (config.js).'));return}
+if(!window.supabase){deny(t('Não foi possível ligar ao servidor.'));return}
 const SB=window.supabase.createClient(CFG.supabaseUrl,CFG.supabaseAnonKey);
 let me=null;
 
-async function check(e){if(e&&e.error){toast('Erro: '+(e.error.message||'tenta outra vez'));return false}return true}
+async function check(e){if(e&&e.error){toast(t('Erro:')+' '+(e.error.message||t('tenta outra vez')));return false}return true}
 function reportItem(r,withFlags){
   const it=el('div','item');
   const head=el('div','row');head.append(el('strong',null,CATS[r.cat]||r.cat),el('span','muted',when(r.quando)));
-  if(r.oculto)head.append(el('span','tag red','Escondido'));
-  if(withFlags)head.append(el('span','tag red',r.denuncias.length+(r.denuncias.length===1?' denúncia':' denúncias')));
+  if(r.oculto)head.append(el('span','tag red',t('Escondido')));
+  if(withFlags)head.append(el('span','tag red',r.denuncias.length+' '+t(r.denuncias.length===1?'denúncia':'denúncias')));
   it.append(head);
-  const by=el('div','muted');by.append('Por ',el('b',null,(r.perfis&&r.perfis.nome)||'?'));if(r.perfis&&r.perfis.bloqueado)by.append(' ',el('span','tag red','bloqueado'));it.append(by);
-  it.append(el('div',null,r.descricao||'(sem descrição)'));
-  if(withFlags){const m=[...new Set(r.denuncias.map(d=>d.motivo).filter(Boolean))];if(m.length)it.append(el('div','muted','Motivos: '+m.join(', ')))}
-  const a=el('a',null,'Ver no OpenStreetMap');a.href=`https://www.openstreetmap.org/?mlat=${r.lat}&mlon=${r.lng}#map=17/${r.lat}/${r.lng}`;a.target='_blank';a.rel='noopener';it.append(a);
+  const by=el('div','muted');by.append(t('Por')+' ',el('b',null,(r.perfis&&r.perfis.nome)||'?'));if(r.perfis&&r.perfis.bloqueado)by.append(' ',el('span','tag red',t('bloqueado')));it.append(by);
+  it.append(el('div',null,r.descricao||t('(sem descrição)')));
+  if(withFlags){const m=[...new Set(r.denuncias.map(d=>d.motivo).filter(Boolean))];if(m.length)it.append(el('div','muted',t('Motivos:')+' '+m.map(x=>t(x)).join(', ')))}
+  const a=el('a',null,t('Ver no OpenStreetMap'));a.href=`https://www.openstreetmap.org/?mlat=${r.lat}&mlon=${r.lng}#map=17/${r.lat}/${r.lng}`;a.target='_blank';a.rel='noopener';it.append(a);
   const acts=el('div','row');
-  acts.append(twoTap('Apagar reporte','red',async()=>{if(await check(await SB.from('reportes').delete().eq('id',r.id))){toast('Reporte apagado');loadAll()}}));
-  if(withFlags)acts.append(btn('Está correto: mostrar outra vez','green',async()=>{if(await check(await SB.rpc('admin_aprovar',{reporte:r.id}))){toast('Reporte aprovado');loadAll()}}));
-  if(r.user_id!==me&&r.perfis&&!r.perfis.bloqueado)acts.append(twoTap('Bloquear autor e apagar os reportes dele','red',async()=>{
-    if(await check(await SB.rpc('admin_bloquear',{alvo:r.user_id,bloquear:true,apagar_reportes:true}))){toast('Autor bloqueado');loadAll()}}));
+  acts.append(twoTap(t('Apagar reporte'),'red',async()=>{if(await check(await SB.from('reportes').delete().eq('id',r.id))){toast(t('Reporte apagado'));loadAll()}}));
+  if(withFlags)acts.append(btn(t('Está correto: mostrar outra vez'),'green',async()=>{if(await check(await SB.rpc('admin_aprovar',{reporte:r.id}))){toast(t('Reporte aprovado'));loadAll()}}));
+  if(r.user_id!==me&&r.perfis&&!r.perfis.bloqueado)acts.append(twoTap(t('Bloquear autor e apagar os reportes dele'),'red',async()=>{
+    if(await check(await SB.rpc('admin_bloquear',{alvo:r.user_id,bloquear:true,apagar_reportes:true}))){toast(t('Autor bloqueado'));loadAll()}}));
   it.append(acts);return it}
-function twoTap(text,cls,fn){const b=btn(text,cls,async()=>{if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent='Toca outra vez para confirmar';return}b.dataset.c='';b.textContent=text;await fn()});return b}
+function twoTap(text,cls,fn){const b=btn(text,cls,async()=>{if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent=t('Toca outra vez para confirmar');return}b.dataset.c='';b.textContent=text;await fn()});return b}
 
 async function loadFlags(){
   const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,oculto,user_id,perfis(nome,bloqueado),denuncias!inner(motivo,criado)').order('quando',{ascending:false}).limit(200);
   const box=$('den-list');box.innerHTML='';box.className='';
-  if(error){box.textContent='Erro: '+error.message;return}
-  if(!data.length){box.className='muted';box.textContent='Não há denúncias por rever.';return}
+  if(error){box.textContent=t('Erro:')+' '+error.message;return}
+  if(!data.length){box.className='muted';box.textContent=t('Não há denúncias por rever.');return}
   data.sort((a,b)=>b.denuncias.length-a.denuncias.length);
   for(const r of data)box.append(reportItem(r,true))}
 async function loadReps(){
   const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,oculto,user_id,perfis(nome,bloqueado)').order('criado',{ascending:false}).limit(100);
   const box=$('rep-list');box.innerHTML='';box.className='';
-  if(error){box.textContent='Erro: '+error.message;return}
-  if(!data.length){box.className='muted';box.textContent='Ainda não há reportes.';return}
+  if(error){box.textContent=t('Erro:')+' '+error.message;return}
+  if(!data.length){box.className='muted';box.textContent=t('Ainda não há reportes.');return}
   for(const r of data)box.append(reportItem(r,false))}
 let users=[];
 async function loadUsers(){
   const {data,error}=await SB.from('perfis').select('id,nome,criado,bloqueado,admin,reportes(count)').order('criado',{ascending:false}).limit(1000);
-  if(error){$('usr-list').textContent='Erro: '+error.message;return}
+  if(error){$('usr-list').textContent=t('Erro:')+' '+error.message;return}
   users=data;drawUsers()}
 function drawUsers(){
   const q=$('usr-q').value.trim().toLowerCase();const box=$('usr-list');box.innerHTML='';box.className='';
   const list=users.filter(u=>!q||u.nome.toLowerCase().includes(q)).slice(0,200);
-  if(!list.length){box.className='muted';box.textContent='Ninguém encontrado.';return}
+  if(!list.length){box.className='muted';box.textContent=t('Ninguém encontrado.');return}
   for(const u of list){const it=el('div','item');const head=el('div','row');
-    head.append(el('strong',null,u.nome),el('span','muted','desde '+new Date(u.criado).toLocaleDateString('pt-PT')),el('span','tag',((u.reportes&&u.reportes[0]&&u.reportes[0].count)||0)+' reportes'));
-    if(u.admin)head.append(el('span','tag','admin'));if(u.bloqueado)head.append(el('span','tag red','bloqueado'));
+    head.append(el('strong',null,u.nome),el('span','muted',t('desde {d}',{d:new Date(u.criado).toLocaleDateString(I.locale())})),el('span','tag',t('{n} reportes',{n:(u.reportes&&u.reportes[0]&&u.reportes[0].count)||0})));
+    if(u.admin)head.append(el('span','tag','admin'));if(u.bloqueado)head.append(el('span','tag red',t('bloqueado')));
     it.append(head);
     if(u.id!==me){const acts=el('div','row');
-      if(u.bloqueado)acts.append(btn('Desbloquear','green',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:false}))){toast('Conta desbloqueada');loadAll()}}));
-      else{acts.append(twoTap('Bloquear','red',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:true}))){toast('Conta bloqueada');loadAll()}}),
-        twoTap('Bloquear e apagar os reportes','red',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:true,apagar_reportes:true}))){toast('Conta bloqueada');loadAll()}}))}
+      if(u.bloqueado)acts.append(btn(t('Desbloquear'),'green',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:false}))){toast(t('Conta desbloqueada'));loadAll()}}));
+      else{acts.append(twoTap(t('Bloquear'),'red',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:true}))){toast(t('Conta bloqueada'));loadAll()}}),
+        twoTap(t('Bloquear e apagar os reportes'),'red',async()=>{if(await check(await SB.rpc('admin_bloquear',{alvo:u.id,bloquear:true,apagar_reportes:true}))){toast(t('Conta bloqueada'));loadAll()}}))}
       it.append(acts)}
     box.append(it)}}
 $('usr-q').oninput=drawUsers;
 async function loadDefs(){const {data}=await SB.from('definicoes').select('*').eq('id',1).maybeSingle();if(!data)return;
   $('d-tel').checked=data.exigir_telemovel;$('d-ln').value=data.limite_conta_nova;$('d-lo').value=data.limite_normal;$('d-dias').value=data.dias_conta_nova;$('d-den').value=data.denuncias_para_ocultar}
 $('d-save').onclick=async()=>{const v={exigir_telemovel:$('d-tel').checked,limite_conta_nova:+$('d-ln').value,limite_normal:+$('d-lo').value,dias_conta_nova:+$('d-dias').value,denuncias_para_ocultar:Math.max(1,+$('d-den').value)};
-  if(await check(await SB.from('definicoes').update(v).eq('id',1)))toast('Definições guardadas')};
+  if(await check(await SB.from('definicoes').update(v).eq('id',1)))toast(t('Definições guardadas'))};
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);$('t-'+x.dataset.tab).hidden=!on})});
 function loadAll(){loadFlags();loadReps();loadUsers()}
 
 (async()=>{
   const {data:{session}}=await SB.auth.getSession();
-  if(!session){deny('Entra primeiro na app com a tua conta de administrador e depois volta a esta página.');return}
+  if(!session){deny(t('Entra primeiro na app com a tua conta de administrador e depois volta a esta página.'));return}
   me=session.user.id;
   const {data:p}=await SB.from('perfis').select('nome,admin,bloqueado').eq('id',me).maybeSingle();
-  if(!p||!p.admin||p.bloqueado){deny('A tua conta não é de administrador.');return}
-  $('who').textContent='Sessão de '+p.nome+'.';$('panel').hidden=false;loadAll();loadDefs();
+  if(!p||!p.admin||p.bloqueado){deny(t('A tua conta não é de administrador.'));return}
+  $('who').textContent=t('Sessão de {n}.',{n:p.nome});$('panel').hidden=false;loadAll();loadDefs();
 })();
 })();
 </script>
