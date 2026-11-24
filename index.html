@@ -174,6 +174,28 @@ textarea{resize:none;min-height:70px}
 .gdpr{display:flex;gap:10px;font:700 .78rem var(--font);line-height:1.45;color:var(--muted);background:var(--card-2);border-radius:16px;padding:12px}
 .gdpr svg{flex:none;color:var(--ok)}
 .actions{display:flex;gap:10px}
+/* tutorial e pedido de localização */
+.modal{position:fixed;inset:0;z-index:4500;display:grid;place-items:center;padding:16px;background:rgba(15,21,48,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.mcard{width:100%;max-width:400px;max-height:calc(100% - 8px);overflow:auto;background:var(--card);color:var(--fg);border-radius:28px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:22px 20px 18px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px}
+.mcard h2{font:900 1.3rem var(--font);margin:0;text-wrap:balance}
+.mcard p{margin:0;color:var(--muted);font:700 .95rem/1.45 var(--font)}
+.mcard p b{color:var(--fg)}
+.mcard .actions .btn{padding:13px 14px}
+.mart{height:132px;border-radius:20px;display:grid;place-items:center;background:var(--card-2);position:relative;overflow:hidden}
+.slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;gap:0}
+.slides::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;gap:12px}
+.dots{display:flex;justify-content:center;gap:7px}
+.dots i{width:8px;height:8px;border-radius:4px;background:var(--line);transition:width .2s,background .2s}
+.dots i.on{width:22px;background:var(--fg)}
+.mini{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--card);font:800 .8rem var(--font);box-shadow:var(--shadow)}
+.chip i{width:10px;height:10px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.1)}
+.fakefab{width:52px;height:52px;border-radius:50%;background:var(--sun);color:var(--sun-ink);display:grid;place-items:center;box-shadow:0 4px 0 color-mix(in srgb,var(--sun) 55%,#a06a00)}
+.fakebtn{padding:8px 12px;border-radius:999px;font:900 .8rem var(--font);background:var(--ok);color:#fff}
+.fakebtn.warn{background:transparent;color:var(--viol);box-shadow:inset 0 0 0 2px var(--viol)}
+.round.help{font:900 1.25rem var(--font)}
+
 .me-dot{width:18px;height:18px;border-radius:50%;background:#2f7bff;border:3px solid #fff;box-shadow:0 0 0 2px rgba(47,123,255,.35),0 2px 6px rgba(0,0,0,.35);box-sizing:border-box}
 @media (prefers-reduced-motion:no-preference){.me-dot{animation:mepulse 2s ease-out infinite}@keyframes mepulse{0%{box-shadow:0 0 0 0 rgba(47,123,255,.55),0 2px 6px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 16px rgba(47,123,255,0),0 2px 6px rgba(0,0,0,.35)}}}
 #locate.busy svg{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
@@ -269,6 +291,7 @@ textarea{resize:none;min-height:70px}
   <button class="round" id="zout" aria-label="Afastar">−</button>
   <button class="round" id="locate" aria-label="Centrar em mim" title="Centrar em mim"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg></button>
   <button class="round" id="home" aria-label="Ver Portugal inteiro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M12 2 4 21l8-4 8 4z"/></svg></button>
+  <button class="round help" id="help" aria-label="Como usar a app" title="Como usar a app">?</button>
   <button class="round" id="acct" aria-label="A minha conta" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
 </div>
 
@@ -419,6 +442,58 @@ textarea{resize:none;min-height:70px}
   </div>
 </div>
 
+<!-- tutorial do primeiro acesso -->
+<div class="modal" id="tut" hidden role="dialog" aria-modal="true" aria-labelledby="tut-t0">
+  <div class="mcard">
+    <div class="slides" id="slides">
+      <div class="slide"><div class="mart"><svg width="72" height="72" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg></div>
+        <h2 id="tut-t0">Bem-vindo ao Alerta Portugal</h2>
+        <p>Um mapa feito pela comunidade para assinalar <b>violência</b> e <b>mau estacionamento</b> na tua zona. Em 30 segundos mostramos-te como funciona.</p>
+        <p>Em emergência, liga sempre <b>112</b>.</p></div>
+      <div class="slide"><div class="mart"><div class="mini"><span class="fakefab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><span class="chip">Arrasta o mapa</span><span class="fakebtn">É aqui!</span></div></div>
+        <h2>Marcar uma ocorrência</h2>
+        <p>Toca no <b>lápis amarelo</b>, arrasta o mapa até ao sítio certo e carrega em <b>É aqui!</b>. Depois escolhes o tipo, quando foi e, se quiseres, uma descrição curta.</p></div>
+      <div class="slide"><div class="mart"><div class="mini" style="flex-direction:column"><span class="chip"><span id="tut-badge"></span>Violência · há 10 min</span><span class="chip">Publicado por <b>Ana</b> a 23/11 às 21:40</span></div></div>
+        <h2>Ver o que se passa</h2>
+        <p>Toca num ponto do mapa para ver o que aconteceu, <b>quem publicou</b> e <b>o dia e a hora</b>. O botão de lista, ao lado da pesquisa, mostra os mais recentes.</p></div>
+      <div class="slide"><div class="mart"><div class="mini"><span class="fakebtn">Também vi isto</span><span class="fakebtn warn">Denunciar</span></div></div>
+        <h2>Ajudar a comunidade</h2>
+        <p>Se também viste, carrega em <b>Também vi isto</b>: dá mais confiança ao alerta. Se um alerta for falso ou ofensivo, usa <b>Denunciar</b>. Não escrevas nomes, matrículas nem telefones.</p></div>
+      <div class="slide"><div class="mart"><div class="mini"><span class="chip"><i style="background:#2f6bff"></i>Esquadra</span><span class="chip"><i style="background:#e5484d"></i>Hospital</span><span class="chip"><i style="background:#0d9488"></i>Supermercado</span><span class="chip"><i style="background:#ea580c"></i>Restaurante</span><span class="round" style="width:40px;height:40px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg></span></div></div>
+        <h2>Orienta-te no mapa</h2>
+        <p>As bolinhas coloridas são pontos de referência: esquadras, hospitais, escolas, supermercados, restaurantes e mais. O botão com o <b>alvo</b> leva o mapa até onde estás. O <b>?</b> mostra esta ajuda outra vez.</p></div>
+    </div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <div class="actions">
+      <button type="button" class="btn line" id="tut-skip">Saltar</button>
+      <button type="button" class="btn go" id="tut-next">Seguinte</button>
+    </div>
+  </div>
+</div>
+
+<!-- pedido de localização (antes do pedido do sistema) -->
+<div class="modal" id="askloc" hidden role="dialog" aria-modal="true" aria-labelledby="askloc-t">
+  <div class="mcard">
+    <div class="mart"><span class="me-dot" style="transform:scale(2)"></span></div>
+    <h2 id="askloc-t">Mostrar o mapa onde estás?</h2>
+    <p>Com a tua localização, o mapa abre logo na tua rua e vês os alertas à tua volta. A localização <b>fica só no teu telemóvel</b>: não é enviada nem guardada por nós.</p>
+    <p style="font-size:.85rem">A seguir, o telemóvel ou o navegador vai pedir autorização. Carrega em <b>Permitir</b>.</p>
+    <div class="actions">
+      <button type="button" class="btn line" id="askloc-no">Agora não</button>
+      <button type="button" class="btn go" id="askloc-yes">Sim, localizar</button>
+    </div>
+  </div>
+</div>
+
+<!-- como ativar a localização depois -->
+<div class="modal" id="lochelp" hidden role="dialog" aria-modal="true" aria-labelledby="lochelp-t">
+  <div class="mcard">
+    <h2 id="lochelp-t">A localização está bloqueada</h2>
+    <p id="lochelp-txt"></p>
+    <button type="button" class="btn go" id="lochelp-ok">Percebi</button>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 
 <script src="config.js"></script>
@@ -472,24 +547,86 @@ const wide=()=>window.innerWidth>=760;const fitPT=()=>map.fitBounds(PT,wide()?{p
 map.attributionControl.setPrefix(false);
 $('zin').onclick=()=>map.zoomIn();$('zout').onclick=()=>map.zoomOut();
 $('home').onclick=fitPT;
-// ---------- a minha localização (só neste aparelho, nunca é enviada) ----------
-let meDot=null,meAcc=null;
-function locateMe(manual){
-  if(!('geolocation' in navigator)){if(manual)toast('Este aparelho não consegue indicar a localização');return}
-  $('locate').classList.add('busy');
-  navigator.geolocation.getCurrentPosition(p=>{$('locate').classList.remove('busy');
-    const ll=[p.coords.latitude,p.coords.longitude];
-    if(!L.latLngBounds([[29,-34],[46,0]]).contains(ll)){if(manual)toast('Pareces estar fora de Portugal');return}
-    if(!meDot){meAcc=L.circle(ll,{radius:p.coords.accuracy,interactive:false,color:'#2f7bff',weight:1,opacity:.4,fillOpacity:.1}).addTo(map);
-      meDot=L.marker(ll,{interactive:false,keyboard:false,zIndexOffset:-100,icon:L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map)}
-    else{meDot.setLatLng(ll);meAcc.setLatLng(ll).setRadius(p.coords.accuracy)}
-    if($('placebar').hidden)map.flyTo(ll,Math.max(map.getZoom(),15),{duration:manual?.8:1.2});else map.setView(ll,Math.max(map.getZoom(),16));
-  },e=>{$('locate').classList.remove('busy');
-    toast(e.code===1?'Sem permissão para a localização. Podes procurar a tua cidade.':'Não foi possível saber onde estás. Podes procurar a tua cidade.')},
-  {enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+// ---------- a minha localização (fica só neste aparelho, nunca é enviada) ----------
+const store2={get:k=>safe(()=>localStorage.getItem(k),null),set:(k,v)=>safe(()=>localStorage.setItem(k,v))};
+const K_TUT='ap-tutorial-v1',K_LOC='ap-loc-v1',K_LAST='ap-last-pos-v1';
+const PT_BOX=L.latLngBounds([[29,-34],[46,0]]);
+const STREET=17;
+let meDot=null,meAcc=null,watchId=null,watchStop=null,slowT=null,gotFix=false;
+// Abrir logo perto do último sítio conhecido (guardado só neste aparelho), enquanto o GPS responde.
+(()=>{const l=safe(()=>JSON.parse(store2.get(K_LAST)||'null'),null);
+  if(l&&PT_BOX.contains([l.lat,l.lng])&&store2.get(K_LOC)==='yes')map.setView([l.lat,l.lng],15,{animate:false})})();
+function drawMe(ll,acc){
+  if(!meDot){meAcc=L.circle(ll,{radius:acc,interactive:false,color:'#2f7bff',weight:1,opacity:.4,fillOpacity:.1}).addTo(map);
+    meDot=L.marker(ll,{interactive:false,keyboard:false,zIndexOffset:-100,icon:L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]})}).addTo(map)}
+  else{meDot.setLatLng(ll);meAcc.setLatLng(ll).setRadius(acc)}
 }
-$('locate').onclick=()=>locateMe(true);
-setTimeout(()=>locateMe(false),600);
+function stopWatch(){if(watchId!=null)navigator.geolocation.clearWatch(watchId);watchId=null;clearTimeout(watchStop);clearTimeout(slowT);$('locate').classList.remove('busy')}
+function isNative(){return !!safe(()=>window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform(),false)}
+function showLocHelp(){
+  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent),and=/Android/.test(navigator.userAgent);
+  $('lochelp-txt').textContent=isNative()
+    ?(ios?'Abre Definições > Alerta Portugal > Localização e escolhe "Durante a utilização da app". Depois volta aqui e toca no botão do alvo.'
+         :'Abre Definições > Apps > Alerta Portugal > Permissões > Localização e escolhe "Permitir apenas durante a utilização". Depois volta aqui e toca no botão do alvo.')
+    :(ios?'No iPhone: Definições > Privacidade e segurança > Serviços de localização > Sites do Safari > "Durante a utilização". Depois recarrega a página e toca no botão do alvo.'
+     :and?'No Chrome: toca no ícone à esquerda do endereço do site > Permissões > Localização > Permitir. Depois toca no botão do alvo.'
+         :'Clica no ícone à esquerda do endereço do site, ativa a Localização e recarrega a página. Depois clica no botão do alvo.');
+  $('lochelp').hidden=false}
+$('lochelp-ok').onclick=()=>{$('lochelp').hidden=true};
+// Procura a posição: primeiro voo assim que houver resposta, depois afina a precisão durante uns segundos.
+function locateMe(manual){
+  if(!('geolocation' in navigator)){toast('Este aparelho não consegue indicar a localização');return}
+  stopWatch();gotFix=false;$('locate').classList.add('busy');
+  slowT=setTimeout(()=>{if(!gotFix)toast('A procurar a tua localização…')},3000);
+  const ok=p=>{const ll=[p.coords.latitude,p.coords.longitude],acc=p.coords.accuracy||50;
+    if(!PT_BOX.contains(ll)){stopWatch();if(manual||!gotFix)toast('Pareces estar fora de Portugal. O mapa fica em Portugal.');gotFix=true;return}
+    const first=!gotFix;gotFix=true;store2.set(K_LOC,'yes');store2.set(K_LAST,JSON.stringify({lat:+ll[0].toFixed(3),lng:+ll[1].toFixed(3)}));
+    drawMe(ll,acc);
+    if(first){clearTimeout(slowT);$('locate').classList.remove('busy');
+      if($('placebar').hidden)map.flyTo(ll,Math.max(map.getZoom(),STREET),{duration:1});else map.setView(ll,Math.max(map.getZoom(),STREET))}
+    if(acc<=30)stopWatch()};
+  const bad=e=>{if(gotFix)return;stopWatch();
+    if(e.code===1){store2.set(K_LOC,'denied');showLocHelp()}
+    else toast(e.code===3?'O GPS está a demorar. Tenta outra vez no botão do alvo, de preferência ao ar livre.':'Não foi possível saber onde estás. Podes procurar a tua cidade.')};
+  watchId=navigator.geolocation.watchPosition(ok,bad,{enableHighAccuracy:true,timeout:15000,maximumAge:30000});
+  watchStop=setTimeout(()=>{if(!gotFix)bad({code:3});stopWatch()},20000);
+}
+$('locate').onclick=()=>{$('askloc').hidden=true;locateMe(true)};
+$('askloc-yes').onclick=()=>{$('askloc').hidden=true;store2.set(K_LOC,'yes');locateMe(false)};
+$('askloc-no').onclick=()=>{$('askloc').hidden=true;store2.set(K_LOC,'no:'+Date.now());toast('Sem problema. Podes usar o botão do alvo quando quiseres.')};
+// Decide se pergunta, localiza logo, ou não faz nada.
+async function startLocation(){
+  if(!('geolocation' in navigator))return;
+  const c=store2.get(K_LOC)||'';
+  let perm=null;try{if(navigator.permissions)perm=(await navigator.permissions.query({name:'geolocation'})).state}catch(e){}
+  if(perm==='granted'){locateMe(false);return}         // já autorizou: localiza sem perguntar
+  if(perm==='denied'){return}                          // bloqueado: não incomoda; o botão do alvo explica como ativar
+  if(c==='yes'&&isNative()){locateMe(false);return}    // na app, o sistema guarda a escolha
+  if(c.startsWith('no:')&&Date.now()-+c.slice(3)<7*864e5)return; // disse "Agora não": volta a perguntar daqui a 7 dias
+  $('askloc').hidden=false;
+}
+// ---------- tutorial do primeiro acesso ----------
+const SL=()=>[...$('slides').children];
+function tutIndex(){const w=$('slides').clientWidth||1;return Math.round($('slides').scrollLeft/w)}
+function tutPaint(){const i=tutIndex(),n=SL().length;
+  [...$('dots').children].forEach((d,k)=>d.classList.toggle('on',k===i));
+  $('tut-next').textContent=i>=n-1?'Começar':'Seguinte';$('tut-skip').style.visibility=i>=n-1?'hidden':''}
+function tutGo(i){$('slides').scrollTo({left:i*$('slides').clientWidth,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
+let tutDone=null;
+function openTutorial(then){
+  $('dots').innerHTML=SL().map(()=>'<i></i>').join('');$('tut-badge').innerHTML=badge('violencia',18);
+  tutDone=then||null;$('tut').hidden=false;$('slides').scrollLeft=0;tutPaint();$('tut-next').focus()}
+function closeTutorial(){$('tut').hidden=true;store2.set(K_TUT,'1');const f=tutDone;tutDone=null;if(f)f()}
+$('slides').addEventListener('scroll',()=>{clearTimeout(tutPaint.t);tutPaint.t=setTimeout(tutPaint,60)},{passive:true});
+$('tut-next').onclick=()=>{const i=tutIndex();if(i>=SL().length-1)closeTutorial();else tutGo(i+1)};
+$('tut-skip').onclick=closeTutorial;
+$('help').onclick=()=>{closeAll();openTutorial()};
+document.addEventListener('keydown',e=>{if($('tut').hidden)return;
+  if(e.key==='ArrowRight')$('tut-next').click();else if(e.key==='ArrowLeft')tutGo(Math.max(0,tutIndex()-1));else if(e.key==='Escape')closeTutorial()});
+// Ordem: primeiro o tutorial (explica a app), depois o pedido de localização.
+let onboarded=false;
+function onboard(){if(onboarded)return;onboarded=true;
+  if(!store2.get(K_TUT))openTutorial(startLocation);else startLocation()}
 
 ['base','roads','labels'].forEach((n,i)=>{const p=map.createPane(n);p.style.zIndex=300+i*20;p.style.pointerEvents='none'});
 map.getPane('labels').style.zIndex=450;
@@ -653,8 +790,8 @@ async function connect(){
   let d=null,u=null;
   if(window.claude&&claude.use){[d,u]=await Promise.all([claude.use('db').catch(()=>null),claude.use('user').catch(()=>null)])}
   if(u)me=await Promise.resolve(safe(()=>u.id(),null)).catch(()=>null);
-  if(!d){live('Neste aparelho');reports=safe(()=>JSON.parse(localStorage.getItem(LS)||'[]'),[])||[];render();return}
-  db=d;const t=setTimeout(()=>live('Sem ligação'),10000);
+  if(!d){live('Neste aparelho');reports=safe(()=>JSON.parse(localStorage.getItem(LS)||'[]'),[])||[];render();onboard();return}
+  db=d;onboard();const t=setTimeout(()=>live('Sem ligação'),10000);
   db.collection('ocorrencias').onSnapshot(s=>{clearTimeout(t);reports=s.docs.map(x=>({id:x.id,...x.data()}));live('Ao vivo',true);render();
     if(current){const c=reports.find(r=>r.id===current.id);if(c)showDetail(c,true);else closeAll()}},
     ()=>{clearTimeout(t);live('Erro')});
@@ -694,7 +831,7 @@ async function afterLogin(){
   defs=d.data||{};perfil=p.data;
   if(!perfil){gate('name');const md=session.user.user_metadata||{};$('g-nome').value=String(md.full_name||md.name||'').split(' ')[0].slice(0,30);$('g-ok').checked=false;checkName();return}
   if(defs.exigir_telemovel&&!session.user.phone_confirmed_at&&!perfil.admin){gate('phone');return}
-  gate(null);$('acct').hidden=false;startLive();
+  gate(null);$('acct').hidden=false;startLive();onboard();
 }
 const cleanName=v=>v.replace(/\s+/g,' ').trim();
 function nameIssue(n){if(n.length<2)return 'O nome precisa de pelo menos 2 letras.';if(/[@<>]|https?:|www\./i.test(n))return 'Usa só um nome, sem emails nem links.';return null}
