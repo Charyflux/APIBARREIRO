@@ -12,9 +12,13 @@ main{max-width:720px;margin:0 auto;padding:24px 16px 48px}
 section{background:var(--card);border-radius:14px;padding:16px 20px;margin:14px 0}
 h1{font-size:1.7rem;margin:.4em 0}ul{padding-left:1.2em;margin:.4em 0}li{margin:.3em 0}h2{font-size:1.15rem;margin:.2em 0 .4em}small,.muted{color:var(--muted)}
 a{color:inherit}
+.bar{display:flex;justify-content:space-between;align-items:center}
+.langbtn{display:inline-flex;align-items:center;gap:5px;border:0;border-radius:999px;padding:8px 11px;background:var(--card);color:var(--muted);font:800 .8rem system-ui,sans-serif;cursor:pointer}
+.langbtn svg{color:var(--fg)}.langbtn .on{color:var(--fg);font-weight:900}
 </style>
 </head>
-<body><main>
+<body><main id="pt" translate="no">
+<div class="bar"><span></span><button type="button" class="langbtn" data-lang-toggle></button></div>
 <h1>Política de Privacidade</h1>
 <p class="muted">StreetAlert · Última atualização: 23 de novembro de 2026</p>
 
@@ -57,4 +61,52 @@ a{color:inherit}
 
 <section><h2>Sobre a StreetAlert</h2>
 <p>A StreetAlert é um projeto independente e comunitário. Não pertence nem está ligada a nenhuma entidade pública ou oficial, e os alertas são publicados pelos próprios utilizadores.</p></section>
-</main></body></html>
+</main>
+<main id="en" lang="en" hidden translate="no">
+<div class="bar"><span></span><button type="button" class="langbtn" data-lang-toggle></button></div>
+<h1>Privacy Policy</h1>
+<p class="muted">StreetAlert · Last updated: 23 November 2026</p>
+
+<section><h2>Who we are</h2>
+<p>StreetAlert is a community map where people with an account flag violence or parking problems at a location. Data controller: <strong>[NOME DO RESPONSÁVEL]</strong>, contact: <strong>[EMAIL DE CONTACTO]</strong>.</p></section>
+
+<section><h2>Account and visible name</h2>
+<p>To see and post alerts you need an account, created with your email or your Google account. When text message confirmation is turned on, we also ask for your mobile number, only to confirm that you are a real person.</p>
+<p><strong>The display name you choose is public inside the app:</strong> it appears next to every point you post and can be seen by everyone with an account. You can use just your first name or a nickname, and change it whenever you like in "My account". Your email and mobile number are never shown to anyone.</p></section>
+
+<section><h2>What data we keep</h2>
+<ul>
+<li><strong>Account:</strong> email, mobile number (if confirmed), display name, creation date and, if you sign in with Google, the name and photo Google sends (we do not use the photo).</li>
+<li><strong>Reports:</strong> the type (violence or parking), the position on the map rounded to about 10 metres, an optional description of up to 140 characters, the date and time, and the account that posted it.</li>
+<li><strong>Confirmations and flags:</strong> which account confirmed or flagged each report and the reason for the flag. Flags are only seen by administrators.</li>
+<li><strong>Technical session data:</strong> the account service records the IP address and time of each sign-in, for security.</li>
+</ul>
+<p>We do not ask for photos or number plates, and your device's location never leaves it. Descriptions that seem to identify people (names, number plates, phone numbers, emails) are blocked before publishing. We do not check anyone's criminal record.</p></section>
+
+<section><h2>Your location</h2>
+<p>The first time you use the app, it asks whether you want to use your device's location. If you accept, it is only used to centre the map where you are and show a blue dot. It stays on your device: it is not sent to us or shown to anyone. So that the map opens faster next time, the app stores an approximate position (about 100 metres) on the device itself, which you can delete by clearing the site or app data. Reports still only use the point you choose on the map. You can refuse or withdraw permission in your browser or phone settings, and the app keeps working.</p></section>
+
+<section><h2>What we use the data for</h2>
+<ul>
+<li>Showing reports on the map, with the name of the person who posted them, so the community knows who posts and reports are more reliable.</li>
+<li>Preventing abuse: a daily report limit for new accounts, flags, and blocking accounts that post false or offensive content.</li>
+</ul>
+<p>We do not advertise, build commercial profiles or sell data. Legal bases (Article 6(1) GDPR): performance of the service you request when creating an account (point b) for the account and reports; your consent, given at sign-up, to show your display name (point a), which you can withdraw by changing your name or deleting your account; and legitimate interest in community safety and preventing abuse (point f) for limits, flags and blocks.</p></section>
+
+<section><h2>How long</h2>
+<p>Reports stay on the map for up to 90 days and are deleted automatically after that. Your account is kept until you delete it. If you delete your account in "My account", we immediately delete your profile, email, mobile number and all your reports, confirmations and flags. Backups of the database service are replaced within a few days.</p></section>
+
+<section><h2>Who has access</h2>
+<p>Other people with an account see reports and the display name of who posted them. The app's administrators also see flags and can delete reports and block accounts. Data is stored with Supabase (Supabase Inc.), on a server in the European Union <strong>[confirmar região, ex.: Frankfurt]</strong>, acting as a processor under the GDPR. Sign-in emails and confirmation text messages are sent by that service <strong>[e pelo fornecedor de SMS, ex.: Twilio, se ativo]</strong>. If you sign in with Google, Google knows you used this app.</p>
+<p>To draw the map, the app loads tiles from OpenFreeMap and OpenStreetMap, libraries from cdnjs and jsDelivr, and fonts from Google Fonts. These services receive your device's IP address, like any website.</p></section>
+
+<section><h2>Your rights</h2>
+<p>You have the right of access, rectification, erasure, restriction, portability and objection, and to withdraw consent at any time. You can change your name or delete your account directly in the app; for anything else write to <strong>[EMAIL DE CONTACTO]</strong>. If your account is blocked and you disagree, you can also write to that email. You can also complain to the Portuguese data protection authority, the Comissão Nacional de Proteção de Dados (<a href="https://www.cnpd.pt">cnpd.pt</a>).</p>
+<p>The app is intended for people aged 16 and over.</p></section>
+
+<section><h2>About StreetAlert</h2>
+<p>StreetAlert is an independent community project. It does not belong to and is not linked to any public or official body, and alerts are posted by the users themselves.</p></section>
+</main>
+<script src="i18n.js"></script>
+<script>(function(){const show=()=>{const en=window.I18N&&I18N.lang==='en';document.getElementById('en').hidden=!en;document.getElementById('pt').hidden=en};show();if(window.I18N)I18N.onChange(show)})();</script>
+</body></html>
