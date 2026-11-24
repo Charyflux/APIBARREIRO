@@ -59,7 +59,8 @@ A app já tem entrada com conta (email ou Google), nome visível em cada reporte
    where id = (select id from auth.users where email = 'o-teu-email@exemplo.pt');
    ```
    Na app, em **A minha conta** (botão redondo com uma pessoa), aparece **Painel de administração**. Também podes abrir `https://streetalert.online/admin.html`.
-8. **Política de privacidade.** Preenche os campos entre `[ ]` em `privacidade.html` (o teu nome, email de contacto e a região do Supabase).
+8. **Segurança.** Segue a lista "Definições do Supabase recomendadas" em [`SEGURANCA.md`](SEGURANCA.md) (endereços autorizados, limites, CAPTCHA, MFA).
+9. **Política de privacidade.** Preenche os campos entre `[ ]` em `privacidade.html` (o teu nome, email de contacto e a região do Supabase).
 
 ### Opcional: entrar com Google
 1. Em [console.cloud.google.com](https://console.cloud.google.com) cria um projeto, configura o *OAuth consent screen* e cria uma credencial **OAuth client ID** do tipo *Web application*.

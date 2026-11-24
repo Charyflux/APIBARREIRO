@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Segurança: só deixa carregar código deste site e falar com os serviços que a app usa (ver SEGURANCA.md). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-src 'none'">
 <title>Política de Privacidade · StreetAlert</title>
 <style>
 :root{--bg:#f4f1e8;--fg:#1b2550;--muted:#555b7a;--card:#fff}
@@ -53,7 +55,7 @@ a{color:inherit}
 
 <section><h2>Quem tem acesso</h2>
 <p>Qualquer pessoa que abra a app, com ou sem conta, vê os reportes e o nome de exibição de quem os marcou (nunca o email nem o telemóvel). Os administradores da app veem também as denúncias e podem apagar reportes e bloquear contas. Os dados são guardados no Supabase (Supabase Inc.), num servidor na União Europeia <strong>[confirmar região, ex.: Frankfurt]</strong>, que atua como subcontratante ao abrigo do RGPD. Os emails de entrada e os SMS de confirmação são enviados por esse serviço <strong>[e pelo fornecedor de SMS, ex.: Twilio, se ativo]</strong>. Se entrares com Google, o Google sabe que usaste esta app.</p>
-<p>Para desenhar o mapa, a app carrega mosaicos do OpenFreeMap e do OpenStreetMap, bibliotecas do cdnjs e jsDelivr, e tipos de letra do Google Fonts. Estes serviços recebem o endereço IP do teu aparelho, como qualquer site. Quando procuras uma localidade que não está na lista da app, o nome que escreveste é enviado aos serviços de pesquisa do OpenStreetMap (Photon, da Komoot, e Nominatim) para a encontrar.</p></section>
+<p>Para desenhar o mapa, a app carrega mosaicos do OpenFreeMap e do OpenStreetMap e tipos de letra do Google Fonts. Estes serviços recebem o endereço IP do teu aparelho, como qualquer site. Quando procuras uma localidade que não está na lista da app, o nome que escreveste é enviado aos serviços de pesquisa do OpenStreetMap (Photon, da Komoot, e Nominatim) para a encontrar.</p></section>
 
 <section><h2>Os teus direitos</h2>
 <p>Tens direito de acesso, retificação, apagamento, limitação, portabilidade e oposição, e de retirar o consentimento a qualquer momento. Podes mudar o nome ou apagar a conta diretamente na app; para o resto escreve para <strong>[EMAIL DE CONTACTO]</strong>. Se a tua conta for bloqueada e não concordares, também podes escrever para esse email. Podes ainda apresentar queixa à Comissão Nacional de Proteção de Dados (<a href="https://www.cnpd.pt">cnpd.pt</a>).</p>
@@ -98,7 +100,7 @@ a{color:inherit}
 
 <section><h2>Who has access</h2>
 <p>Anyone who opens the app, with or without an account, sees reports and the display name of who posted them (never the email or mobile number). The app's administrators also see flags and can delete reports and block accounts. Data is stored with Supabase (Supabase Inc.), on a server in the European Union <strong>[confirmar região, ex.: Frankfurt]</strong>, acting as a processor under the GDPR. Sign-in emails and confirmation text messages are sent by that service <strong>[e pelo fornecedor de SMS, ex.: Twilio, se ativo]</strong>. If you sign in with Google, Google knows you used this app.</p>
-<p>To draw the map, the app loads tiles from OpenFreeMap and OpenStreetMap, libraries from cdnjs and jsDelivr, and fonts from Google Fonts. These services receive your device's IP address, like any website. When you search for a place that is not in the app's list, the name you typed is sent to OpenStreetMap search services (Photon by Komoot, and Nominatim) to find it.</p></section>
+<p>To draw the map, the app loads tiles from OpenFreeMap and OpenStreetMap, and fonts from Google Fonts. These services receive your device's IP address, like any website. When you search for a place that is not in the app's list, the name you typed is sent to OpenStreetMap search services (Photon by Komoot, and Nominatim) to find it.</p></section>
 
 <section><h2>Your rights</h2>
 <p>You have the right of access, rectification, erasure, restriction, portability and objection, and to withdraw consent at any time. You can change your name or delete your account directly in the app; for anything else write to <strong>[EMAIL DE CONTACTO]</strong>. If your account is blocked and you disagree, you can also write to that email. You can also complain to the Portuguese data protection authority, the Comissão Nacional de Proteção de Dados (<a href="https://www.cnpd.pt">cnpd.pt</a>).</p>
