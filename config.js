@@ -6,6 +6,5 @@
 window.ALERTA_CONFIG = {
   supabaseUrl: '',
   supabaseAnonKey: '',
-  google: false, // muda para true depois de ativares o Google em Supabase > Authentication > Providers
-  appStoreUrl: '' // link da App Store quando a app lá estiver (aparece no botão "Descarregar app" do iPhone)
+  google: false // muda para true depois de ativares o Google em Supabase > Authentication > Providers
 };
