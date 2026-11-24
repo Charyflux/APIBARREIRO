@@ -319,9 +319,9 @@ textarea{resize:none;min-height:70px}
 
 <div class="top" id="top">
   <div class="brandrow"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg><b>StreetAlert</b><span class="live" id="live2"><i></i><span id="livetxt2">A ligar</span></span></div>
-  <form class="search" id="searchbox" role="search" action="#" novalidate>
-    <button type="submit" class="qgo" id="qgo" aria-label="Procurar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.5-4.5"/></svg></button>
-    <input id="q" type="search" enterkeyhint="search" inputmode="search" placeholder="Procurar cidade" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" aria-label="Procurar cidade ou vila">
+  <form class="search" id="searchbox" role="search" onsubmit="return false" novalidate>
+    <button type="button" class="qgo" id="qgo" aria-label="Procurar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.5-4.5"/></svg></button>
+    <input id="q" type="search" enterkeyhint="search" inputmode="search" placeholder="Procurar cidade ou bairro" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false" aria-label="Procurar cidade ou vila">
     <span class="live" id="live"><i></i><span id="livetxt">A ligar</span></span>
     <button class="listbtn" id="listbtn" aria-label="Ver reportes recentes" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
     <div class="results" id="results" hidden translate="no"></div>
@@ -881,6 +881,9 @@ function label(latlng,text,cls,group){
 function loadGeo(draw){
   fetch('mapa-pt.json').then(r=>r.json()).then(g=>{
     geo=g;cities=g.cidades.map(c=>({n:c[0],lat:c[1],lng:c[2],t:c[3],p:c[4]}));
+    // Bairros/freguesias de Lisboa também entram na pesquisa (centro da caixa do polígono).
+    if(g.lisboa)for(const f of g.lisboa.features){let a=90,b=-90,c=180,d=-180;const walk=x=>{if(typeof x[0]==='number'){a=Math.min(a,x[1]);b=Math.max(b,x[1]);c=Math.min(c,x[0]);d=Math.max(d,x[0])}else x.forEach(walk)};walk(f.geometry.coordinates);
+      if(f.properties.n)cities.push({n:f.properties.n,lat:(a+b)/2,lng:(c+d)/2,t:4,p:0,sub:'Lisboa',bb:[a,b,c,d]})}
     if(draw)drawBase(g);
     onZoom();
   }).catch(()=>{});
@@ -904,7 +907,7 @@ function onZoom(){
   if(!cities.length)return;
   const z=map.getZoom();
   if(!lab.built){lab.built=1;
-    for(const c of cities){label([c.lat,c.lng],c.n,c.t===1?'t1':c.t===2?'t2':'t3',c.t===1?lab.t1:c.t===2?lab.t2:lab.t3)}}
+    for(const c of cities){if(c.t>3)continue;label([c.lat,c.lng],c.n,c.t===1?'t1':c.t===2?'t2':'t3',c.t===1?lab.t1:c.t===2?lab.t2:lab.t3)}}
   const show=(g,on)=>on?g.addTo(map):g.remove();
   const k=z<7?.4:z<8.5?.6:z<11?.85:1.2;for(const [l,w] of roads)l.setStyle({weight:w*k});
   if(!tilesOn){
@@ -1128,54 +1131,95 @@ for(const c in CATS)$('f-'+c).onclick=()=>{active[c]=!active[c];$('f-'+c).setAtt
 $('period').onchange=render;
 
 // ---------- search ----------
-// Funciona com o Enter/"Pesquisar" do teclado do telemóvel (submit do formulário, que não depende do keydown,
-// pouco fiável no Android) e com a lupa. Se a cidade não estiver na lista local, pergunta ao OpenStreetMap (Nominatim).
+// Procura cidades, vilas, bairros e ruas. Primeiro na lista local (cidades + freguesias de Lisboa);
+// enquanto se escreve, sugestões do OpenStreetMap (Photon); ao tocar na lupa ou em "Pesquisar" no teclado,
+// Photon e, se falhar, Nominatim. A lupa é um botão normal (não submete o formulário) e o formulário
+// tem onsubmit="return false", para a página nunca recarregar, mesmo que um navegador ignore o JS.
 const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
-let sel=-1,hits=[],remote=null,searching=false;
+let sel=-1,hits=[],remote=null,searching=false,sugT=null,sugSeq=0;
 const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function localHits(q){return cities.filter(c=>norm(c.n).includes(q)).sort((a,b)=>(norm(b.n).startsWith(q)-norm(a.n).startsWith(q))||a.t-b.t||b.p-a.p).slice(0,7)}
+const PTBOX=[-31.6,32.3,-6.1,42.2]; // oeste, sul, este, norte (continente, Madeira e Açores)
+function localHits(q){return cities.filter(c=>norm(c.n).includes(q)).sort((a,b)=>(norm(b.n)===q)-(norm(a.n)===q)||(norm(b.n).startsWith(q)-norm(a.n).startsWith(q))||a.t-b.t||b.p-a.p).slice(0,7)}
+function merged(q){
+  const loc=localHits(q);if(!remote||remote.q!==q)return loc;
+  const out=loc.slice(0,4),key=c=>norm(c.n)+'|'+Math.round(c.lat*50)+'|'+Math.round(c.lng*50);const seen=new Set(out.map(key));
+  for(const c of remote.list){if(out.length>=8)break;if(!seen.has(key(c))){seen.add(key(c));out.push(c)}}
+  return out}
 function showResults(msg){
   const raw=$('q').value.trim(),q=norm(raw);const box=$('results');
   if(!q){box.innerHTML='<div class="quick">'+[['pt','Continente'],['ma','Madeira'],['az','Açores'],['lx','Lisboa'],['po','Porto']].map(([k,n])=>`<button type="button" data-go="${k}">${t(n)}</button>`).join('')+'</div>';box.hidden=false;hits=[];return}
-  hits=remote&&remote.q===q?remote.list:localHits(q);
+  hits=merged(q);
   let html=hits.map((c,i)=>`<button type="button" data-i="${i}" class="${i===sel?'sel':''}"><span></span><small>${c.sub?esc(c.sub):c.p>=1000?t('{n} mil hab.',{n:Math.round(c.p/1000)}):''}</small></button>`).join('');
-  if(!hits.length)html='<div class="msg">'+esc(msg||(searching?t('A procurar…'):t('Toca na lupa ou em Pesquisar para procurar «{q}».',{q:raw})))+'</div>';
+  if(msg)html+='<div class="msg">'+esc(msg)+'</div>';
+  else if(!hits.length)html='<div class="msg">'+esc(searching?t('A procurar…'):t('Toca na lupa ou em Pesquisar para procurar «{q}».',{q:raw}))+'</div>';
   box.innerHTML=html;
   box.querySelectorAll('button[data-i]').forEach(b=>b.firstChild.textContent=hits[+b.dataset.i].n);
   box.hidden=false;
 }
-async function geocode(raw){
-  const u='https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=pt&limit=6&accept-language='+(I.lang==='en'?'en':'pt')+'&q='+encodeURIComponent(raw);
-  const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),8000);
-  try{const r=await fetch(u,{signal:ctl.signal,headers:{Accept:'application/json'}});if(!r.ok)throw new Error(r.status);
-    const seen=new Set();
+function withTimeout(ms){const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),ms);return {signal:ctl.signal,done:()=>clearTimeout(tm)}}
+const inPT=c=>isFinite(c.lat)&&isFinite(c.lng)&&c.lng>=PTBOX[0]&&c.lng<=PTBOX[2]&&c.lat>=PTBOX[1]&&c.lat<=PTBOX[3];
+async function photon(raw,limit){
+  const w=withTimeout(7000);
+  try{const r=await fetch('https://photon.komoot.io/api/?limit='+(limit||8)+'&lang='+(I.lang==='en'?'en':'default')+'&bbox='+PTBOX.join(',')+'&q='+encodeURIComponent(raw),{signal:w.signal});
+    if(!r.ok)throw new Error('photon '+r.status);const j=await r.json();
+    return (j.features||[]).filter(f=>!f.properties.countrycode||f.properties.countrycode==='PT').map(f=>{const p=f.properties,co=f.geometry.coordinates,e=p.extent;
+      const sub=[p.street&&p.name!==p.street?p.street:null,p.district!==p.name?p.district:null,p.city!==p.name?p.city:null,p.county!==p.city?p.county:null].filter(Boolean).slice(0,2).join(', ')||p.state||'';
+      return {n:p.name||p.street||p.city,lat:co[1],lng:co[0],t:5,p:0,sub,bb:e&&[e[3],e[1],e[0],e[2]]}}).filter(c=>c.n&&inPT(c));
+  }finally{w.done()}}
+async function nominatim(raw){
+  const w=withTimeout(8000);
+  try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&countrycodes=pt&limit=8&accept-language='+(I.lang==='en'?'en':'pt')+'&q='+encodeURIComponent(raw),{signal:w.signal});
+    if(!r.ok)throw new Error('nominatim '+r.status);
     return (await r.json()).map(x=>{const parts=String(x.display_name||'').split(',').map(s=>s.trim());
-      return {n:x.name||parts[0],lat:+x.lat,lng:+x.lon,t:3,p:0,sub:parts.slice(1,3).join(', '),bb:x.boundingbox&&x.boundingbox.map(Number)}})
-      .filter(c=>c.n&&isFinite(c.lat)&&isFinite(c.lng)&&!seen.has(c.n+c.sub)&&seen.add(c.n+c.sub));
-  }finally{clearTimeout(tm)}
+      return {n:x.name||parts[0],lat:+x.lat,lng:+x.lon,t:5,p:0,sub:parts.slice(1,3).join(', '),bb:x.boundingbox&&x.boundingbox.map(Number)}}).filter(c=>c.n&&inPT(c));
+  }finally{w.done()}}
+async function geocode(raw){
+  let list=[],err=null;
+  try{list=await photon(raw)}catch(e){err=e}
+  if(!list.length){try{list=await nominatim(raw);err=null}catch(e){err=err||e}}
+  if(!list.length&&err)throw err;
+  const seen=new Set();return list.filter(c=>{const k=norm(c.n)+'|'+(c.sub||'');if(seen.has(k))return false;seen.add(k);return true});
+}
+// Sugestões enquanto se escreve (só quando a lista local tem poucas respostas).
+function suggest(){
+  clearTimeout(sugT);const raw=$('q').value.trim(),q=norm(raw);
+  if(q.length<3||localHits(q).length>=4)return;
+  const my=++sugSeq;
+  sugT=setTimeout(async()=>{try{const list=await photon(raw,6);
+    if(my!==sugSeq||norm($('q').value.trim())!==q)return;remote={q,list};if(document.activeElement===$('q')||!$('results').hidden)showResults()}catch(e){}},400);
 }
 async function doSearch(){
+  clearTimeout(sugT);sugSeq++;
   const raw=$('q').value.trim(),q=norm(raw);
   if(!q){$('q').focus();showResults();return}
-  const loc=remote&&remote.q===q?remote.list:localHits(q);
-  if(loc.length){goCity(loc[Math.max(sel,0)]||loc[0]);return}
+  const cur=merged(q);
+  if(sel>=0&&cur[sel]){goCity(cur[sel]);return}
+  const exact=cur.find(c=>norm(c.n)===q);
+  if(exact&&(cur.filter(c=>norm(c.n)===q).length===1)){goCity(exact);return}
+  if(cur.length===1){goCity(cur[0]);return}
   if(searching)return;
-  searching=true;remote=null;showResults();
+  searching=true;showResults();
   try{const list=await geocode(raw);if(norm($('q').value.trim())!==q)return;
-    if(list.length===1){goCity(list[0]);return}
     remote={q,list};sel=-1;
-    showResults(list.length?'':t('Não encontrámos «{q}» em Portugal. Confirma o nome ou experimenta uma cidade próxima.',{q:raw}));
-  }catch(e){showResults(t('Sem ligação para procurar «{q}». Verifica a internet e tenta outra vez.',{q:raw}))}
+    const all=merged(q);
+    if(all.length===1){goCity(all[0]);return}
+    if(!all.length){showResults(t('Não encontrámos «{q}» em Portugal. Confirma o nome ou experimenta uma cidade próxima.',{q:raw}));return}
+    showResults(t('Escolhe o sítio certo na lista.'));
+  }catch(e){
+    const loc=localHits(q);if(loc.length){goCity(loc[0]);return}
+    showResults(t('Sem ligação para procurar «{q}». Verifica a internet e tenta outra vez.',{q:raw}))}
   finally{searching=false}
 }
 const GO={pt:()=>fitPT(true),ma:()=>map.flyTo([32.75,-16.95],10),az:()=>map.flyToBounds([[36.9,-31.3],[39.8,-25]]),lx:()=>map.flyTo([38.722,-9.14],13),po:()=>map.flyTo([41.155,-8.62],13)};
 function goCity(c){
-  if(c.bb&&c.bb[1]-c.bb[0]>0.05)map.flyToBounds([[c.bb[0],c.bb[2]],[c.bb[1],c.bb[3]]],{duration:1,maxZoom:13});
-  else map.flyTo([c.lat,c.lng],c.sub?14:c.t===1?12:12.5,{duration:1});
+  const bb=c.bb&&c.bb.every(isFinite)?c.bb:null;
+  if(bb&&bb[1]-bb[0]>0.004)map.flyToBounds([[bb[0],bb[2]],[bb[1],bb[3]]],{duration:1,maxZoom:c.t>=4?16:13,padding:[20,20]});
+  else map.flyTo([c.lat,c.lng],c.t===5?15:c.t===4?14:c.t===1?12:12.5,{duration:1});
   $('q').value='';remote=null;sel=-1;$('results').hidden=true;$('q').blur()}
 $('searchbox').addEventListener('submit',e=>{e.preventDefault();doSearch()});
+$('qgo').addEventListener('click',e=>{e.preventDefault();doSearch()});
 $('q').addEventListener('focus',()=>showResults());
-$('q').addEventListener('input',()=>{sel=-1;remote=null;showResults()});
+$('q').addEventListener('input',()=>{sel=-1;if(remote&&remote.q!==norm($('q').value.trim()))remote=null;showResults();suggest()});
 $('q').addEventListener('search',()=>{if(!$('q').value)showResults()});
 $('q').addEventListener('keydown',e=>{
   if(e.key==='ArrowDown'){sel=Math.min(sel+1,hits.length-1);showResults();e.preventDefault()}
@@ -1189,7 +1233,7 @@ for(const el of [$('results'),$('qgo')]){
 document.addEventListener('pointerup',()=>setTimeout(()=>pressing=false,400),true);
 $('results').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.dataset.go){GO[b.dataset.go]();$('results').hidden=true;$('q').blur()}else if(hits[+b.dataset.i])goCity(hits[+b.dataset.i])});
-$('q').addEventListener('blur',()=>setTimeout(()=>{if(!pressing&&document.activeElement!==$('q'))$('results').hidden=true},250));
+$('q').addEventListener('blur',()=>setTimeout(()=>{if(!pressing&&!searching&&document.activeElement!==$('q'))$('results').hidden=true},250));
 
 function nearest(lat,lng){let best=null,bd=1e9;for(const c of cities){if(c.t===3&&c.p<8000)continue;const d=(c.lat-lat)**2+((c.lng-lng)*Math.cos(lat*Math.PI/180))**2;if(d<bd){bd=d;best=c}}
   if(!best)return '';const km=Math.sqrt(bd)*111;return km<2?t('em {x}',{x:best.n}):t('a {n} km de {x}',{n:Math.round(km),x:best.n})}
