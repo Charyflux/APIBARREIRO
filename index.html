@@ -1076,5 +1076,15 @@ $('d-del').onclick=async()=>{const b=$('d-del');if(b.dataset.c!=='1'){b.dataset.
 function toast(t){$('toast').textContent=t;$('toast').hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>$('toast').hidden=true,2600)}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.activeElement!==$('q'))closeAll()});
 connect();
+// Versão nova publicada? O navegador pode guardar a página até 10 minutos; compara a data da página
+// carregada com a do servidor e recarrega uma vez se houver versão mais recente.
+(async()=>{try{
+  if(location.protocol!=='https:')return;
+  const r=await fetch(location.pathname,{method:'HEAD',cache:'no-store'});
+  const srv=Date.parse(r.headers.get('last-modified')||''),mine=Date.parse(document.lastModified);
+  if(!srv||!mine||srv-mine<5000)return;
+  const k='ap-reloaded',t=+(sessionStorage.getItem(k)||0);if(Date.now()-t<60000)return;
+  sessionStorage.setItem(k,String(Date.now()));location.reload();
+}catch(e){}})();
 })();
 </script>
