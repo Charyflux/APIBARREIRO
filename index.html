@@ -220,6 +220,15 @@ textarea{resize:none;min-height:70px}
 .steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;counter-reset:st}
 .steps li{display:flex;align-items:center;gap:12px;font:700 .95rem/1.4 var(--font);color:var(--fg);background:var(--card-2);border-radius:16px;padding:10px 12px}
 .steps .sic{flex:none;width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--card);color:#2f7bff;font:900 1rem var(--font)}
+.steps li small{display:block;margin-top:4px;font:700 .8rem/1.4 var(--font);color:var(--muted)}
+.steps .sic-app{background:none;overflow:hidden;border-radius:9px}
+.steps .sic-app img{width:36px;height:36px;display:block}
+.modal.witharrow{padding-bottom:92px}
+.inst-arrow{position:absolute;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;color:#fff;pointer-events:none;animation:instbob 1.1s ease-in-out infinite}
+.inst-arrow span{font:800 .82rem var(--font);background:linear-gradient(135deg,#2f7bff,#14b8a6);padding:6px 12px;border-radius:999px;white-space:nowrap;box-shadow:0 6px 16px rgba(0,0,0,.3)}
+.inst-arrow svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+@keyframes instbob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+@media (prefers-reduced-motion:reduce){.inst-arrow{animation:none}}
 .mcard p.small{font-size:.8rem}
 .qr{display:flex;gap:14px;align-items:center;background:var(--card-2);border-radius:18px;padding:12px}
 .qr #inst-qr{flex:none;background:#fff;padding:6px;border-radius:10px;line-height:0}
@@ -540,11 +549,16 @@ textarea{resize:none;min-height:70px}
     <p>Fica com um ícone no ecrã principal e abre como uma app, em ecrã inteiro.</p>
     <button type="button" class="btn go" id="inst-now" hidden>Instalar agora</button>
     <div id="inst-ios" hidden style="display:flex;flex-direction:column;gap:12px">
-      <p class="note" id="inst-ios-safari" hidden data-i18n="inst-safari">Abre este site no <b>Safari</b> para o poderes instalar.</p>
-      <ol class="steps">
-        <li><span class="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m-4 4 4-4 4 4"/><path d="M8 10H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2"/></svg></span><span data-i18n="inst-ios1">Toca em <b>Partilhar</b>, na barra do Safari.</span></li>
-        <li><span class="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span><span data-i18n="inst-ios2">Escolhe <b>Adicionar ao ecrã principal</b>.</span></li>
-        <li><span class="sic">✓</span><span data-i18n="inst-ios3">Toca em <b>Adicionar</b>. Pronto!</span></li>
+      <div class="note" id="inst-ios-safari" hidden style="display:flex;flex-direction:column;gap:8px">
+        <span id="inst-ios-other" data-i18n="inst-safari">Para instalar, usa o <b>Safari</b> (o ícone da bússola azul). Copia o link, abre o Safari e cola-o na barra de endereço.</span>
+        <span id="inst-ios-inapp" hidden data-i18n="inst-inapp">Estás dentro de outra app (Instagram, Facebook…). Toca em <b>⋯</b> no canto do ecrã e escolhe <b>Abrir no Safari</b> ou <b>Abrir no navegador</b>. Também podes copiar o link e colá-lo no Safari.</span>
+        <button type="button" class="btn soft" id="inst-copy">Copiar link</button>
+      </div>
+      <ol class="steps" id="inst-ios-steps">
+        <li><span class="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m-4 4 4-4 4 4"/><path d="M8 10H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-2"/></svg></span><span data-i18n="inst-ios1">Toca no botão <b>Partilhar</b>: o quadrado com uma seta para cima. No iPhone está na barra de baixo do Safari; no iPad, em cima à direita.<small>Não o vês? Toca primeiro em <b>⋯</b> ao lado do endereço.</small></span></li>
+        <li><span class="sic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span><span data-i18n="inst-ios2">Desliza a lista para cima e toca em <b>Adicionar ao ecrã principal</b>.</span></li>
+        <li><span class="sic">✓</span><span data-i18n="inst-ios3">Confirma em <b>Adicionar</b>, no canto de cima à direita.</span></li>
+        <li><span class="sic sic-app"><img src="icons/icon-192.png" width="36" height="36" alt=""></span><span data-i18n="inst-ios4">Pronto! A StreetAlert fica no <b>ecrã principal</b>, como outra app qualquer. Abre-a sempre por esse ícone.</span></li>
       </ol>
       <a class="btn soft" id="inst-store" hidden target="_blank" rel="noopener" style="text-decoration:none">Ver na App Store</a>
     </div>
@@ -563,6 +577,7 @@ textarea{resize:none;min-height:70px}
     </div>
     <button type="button" class="btn line" id="inst-close">Fechar</button>
   </div>
+  <div class="inst-arrow" id="inst-arrow" hidden aria-hidden="true"><span data-i18n="inst-arrow">O botão <b>Partilhar</b> está aqui em baixo</span><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15m-6-6 6 6 6-6"/></svg></div>
 </div>
 
 <div class="toast" id="toast" hidden></div>
@@ -1237,6 +1252,7 @@ const APK_URL=CFG.apkUrl||'https://github.com/Charyflux/APIBARREIRO/releases/lat
 const UA=navigator.userAgent;
 const IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const ANDROID=/Android/.test(UA);
+const IPAD=/iPad/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 function isStandalone(){return safe(()=>matchMedia('(display-mode: standalone)').matches,false)||navigator.standalone===true}
 function canInstallUI(){return !NATIVE&&!isStandalone()}
 let bip=window.__bip||null;
@@ -1253,7 +1269,10 @@ function openInstall(){
   const sec=IOS?'ios':ANDROID?'android':'desk';
   for(const k of ['ios','android','desk'])$('inst-'+k).hidden=k!==sec;
   $('inst-now').hidden=!bip;
-  $('inst-ios-safari').hidden=!(IOS&&/CriOS|FxiOS|EdgiOS|GSA\//.test(UA));
+  const inApp=IOS&&/FBAN|FBAV|Instagram|musical_ly|BytedanceWebview|Line\/|Snapchat|LinkedInApp|Twitter/.test(UA);
+  const other=IOS&&(inApp||/CriOS|FxiOS|EdgiOS|OPiOS|GSA\/|DuckDuckGo/.test(UA));
+  $('inst-ios-safari').hidden=!other;$('inst-ios-inapp').hidden=!inApp;$('inst-ios-other').hidden=inApp;
+  const arrow=IOS&&!other&&!IPAD;$('inst-arrow').hidden=!arrow;$('inst').classList.toggle('witharrow',arrow);
   $('inst-store').hidden=!CFG.appStoreUrl;if(CFG.appStoreUrl)$('inst-store').href=CFG.appStoreUrl;
   $('inst-apk').href=$('inst-apk2').href=APK_URL;
   $('inst-android-menu').hidden=!!bip;$('inst-desk-menu').hidden=!!bip;
@@ -1264,6 +1283,10 @@ async function installNow(){const p=bip;bip=window.__bip=null;p.prompt();const r
   if(r&&r.outcome==='accepted'){$('install').hidden=true;$('inst').hidden=true;toast(t('App instalada!'))}return r}
 $('install').onclick=()=>{closeAll();bip=bip||window.__bip;if(bip)installNow();else openInstall()};
 $('inst-close').onclick=()=>{$('inst').hidden=true};
+$('inst-copy').onclick=async()=>{const url=location.origin+location.pathname;let ok=false;
+  try{await navigator.clipboard.writeText(url);ok=true}catch(e){}
+  if(!ok)safe(()=>{const ta=document.createElement('textarea');ta.value=url;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.append(ta);ta.select();ok=document.execCommand('copy');ta.remove()});
+  toast(ok?t('Link copiado. Abre o Safari e cola-o na barra de endereço.'):url)};
 $('inst-now').onclick=async()=>{if(!bip)return;const r=await installNow();if(!(r&&r.outcome==='accepted'))openInstall()};
 $('install').hidden=!canInstallUI();
 connect();
