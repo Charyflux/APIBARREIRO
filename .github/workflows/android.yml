@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write   # para publicar o APK na release "app-latest"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -58,3 +61,25 @@ jobs:
           path: |
             android/app/build/outputs/apk/release/*.apk
             android/app/build/outputs/bundle/release/*.aab
+
+      # Link fixo e público para o botão "Instalar app" do site:
+      # https://github.com/Charyflux/APIBARREIRO/releases/latest/download/streetalert.apk
+      # Usa o APK assinado (release) quando houver chave; senão, o de teste (debug).
+      - name: Publicar o APK no link fixo
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist
+          if ls android/app/build/outputs/apk/release/*.apk >/dev/null 2>&1; then
+            cp "$(ls android/app/build/outputs/apk/release/*.apk | head -1)" dist/streetalert.apk; TIPO="assinado (release)"
+          else
+            cp "$(ls android/app/build/outputs/apk/debug/*.apk | head -1)" dist/streetalert.apk; TIPO="de teste (debug)"
+          fi
+          NOTAS="APK $TIPO gerado a partir de ${GITHUB_SHA::7}. Atualizado sozinho a cada alteração na main."
+          if gh release view app-latest >/dev/null 2>&1; then
+            gh release edit app-latest --title "StreetAlert para Android" --notes "$NOTAS" --latest
+          else
+            gh release create app-latest --title "StreetAlert para Android" --notes "$NOTAS" --latest --target "$GITHUB_SHA"
+          fi
+          gh release upload app-latest dist/streetalert.apk --clobber

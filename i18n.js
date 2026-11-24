@@ -46,6 +46,10 @@ const EN={
 'Violência · há 10 min':'Violence · 10 min ago','Publicado por':'Posted by','a 23/11 às 21:40':'on 23/11 at 21:40','Ver o que se passa':"See what's going on",
 'Ajudar a comunidade':'Help the community','Denunciar':'Flag','Esquadra':'Police station','Hospital':'Hospital','Supermercado':'Supermarket','Restaurante':'Restaurant',
 'Orienta-te no mapa':'Find your way on the map','Saltar':'Skip','Seguinte':'Next','Começar':'Start',
+'Descarregar app':'Download app','Instalar a StreetAlert':'Install StreetAlert','Fica com um ícone no ecrã principal e abre como uma app, em ecrã inteiro.':'Get an icon on your home screen and open it like an app, in full screen.',
+'Instalar agora':'Install now','Ver na App Store':'View on the App Store','Descarregar APK para Android':'Download APK for Android',
+'O APK instala-se fora da Google Play: o telemóvel vai pedir para autorizares a instalação de apps desta origem ("fontes desconhecidas").':'The APK installs outside Google Play: your phone will ask you to allow installing apps from this source ("unknown sources").',
+'Aponta a câmara do telemóvel para abrires a StreetAlert lá e a instalares.':'Point your phone camera here to open StreetAlert there and install it.','App instalada!':'App installed!',
 'Mostrar o mapa onde estás?':'Show the map where you are?','Agora não':'Not now','Sim, localizar':'Yes, find me',
 'A localização está bloqueada':'Location is blocked','Percebi':'Got it',
 'Abre Definições > StreetAlert > Localização e escolhe "Durante a utilização da app". Depois volta aqui e toca no botão do alvo.':'Open Settings > StreetAlert > Location and choose "While Using the App". Then come back and tap the target button.',
@@ -114,6 +118,13 @@ const HT={
 'tut-p4':'The coloured dots are landmarks: police stations, hospitals, schools, supermarkets, restaurants and more. The <b>target</b> button takes the map to where you are. The <b>?</b> shows this help again.',
 'askloc-p0':'With your location, the map opens right on your street and you see the alerts around you. Your location <b>stays on your phone</b>: we never receive or store it.',
 'askloc-p1':'Next, your phone or browser will ask for permission. Press <b>Allow</b>.',
+'inst-safari':'Open this site in <b>Safari</b> to install it.',
+'inst-ios1':'Tap <b>Share</b> in the Safari toolbar.',
+'inst-ios2':'Choose <b>Add to Home Screen</b>.',
+'inst-ios3':'Tap <b>Add</b>. Done!',
+'inst-and1':'Tap the browser menu <b>⋮</b>.',
+'inst-and2':'Choose <b>Install app</b> or <b>Add to Home screen</b>.',
+'inst-desk':'In Chrome or Edge, click the install icon in the address bar, or the menu <b>⋮</b> &gt; <b>Install StreetAlert</b>.',
 'g-note':'<b>Your name is visible.</b> It appears next to every point you post and can be seen by anyone who opens the app. You can use just your first name or a nickname. Your email and mobile number are never shown. <a href="privacidade.html" target="_blank" rel="noopener">Privacy policy</a>'
 };
 const PT={};for(const k in EN)if(!(EN[k] in PT))PT[EN[k]]=k;
