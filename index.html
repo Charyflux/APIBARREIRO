@@ -18,7 +18,7 @@
 .leaflet-marker-icon:hover .pin svg{transform:scale(1.15) translateY(-3px);transition:transform .15s}
 @media (prefers-reduced-motion: reduce){.pin.hot svg,.cl{animation:none}}
 .tiles-dark{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9) saturate(.6)}</style>
-<title>Alerta Portugal</title>
+<title>StreetAlert</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="theme-color" content="#1b2550">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -263,7 +263,7 @@ textarea{resize:none;min-height:70px}
 <div id="map" role="application" aria-label="Mapa de Portugal"></div>
 
 <div class="top" id="top">
-  <div class="brandrow"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg><b>Alerta Portugal</b><span class="live" id="live2"><i></i><span id="livetxt2">A ligar</span></span></div>
+  <div class="brandrow"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg><b>StreetAlert</b><span class="live" id="live2"><i></i><span id="livetxt2">A ligar</span></span></div>
   <div class="search" id="searchbox">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.5-4.5"/></svg>
     <input id="q" type="search" placeholder="Procurar cidade" autocomplete="off" aria-label="Procurar cidade ou vila">
@@ -342,7 +342,7 @@ textarea{resize:none;min-height:70px}
     <div class="err" id="err" hidden></div>
     <div class="who" id="f-who" hidden></div>
     <div class="gdpr"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
-      <span>Na descrição, sem matrículas, nomes, telefones nem fotos (RGPD). A posição é arredondada a uns 10 metros. Emergência? Liga <b>112</b>.</span></div>
+      <span>Na descrição, sem matrículas, nomes, telefones nem fotos (RGPD). A posição é arredondada a uns 10 metros.</span></div>
     <div class="actions">
       <button type="button" class="btn line" id="form-cancel">Cancelar</button>
       <button type="submit" class="btn go" id="save" disabled>Publicar</button>
@@ -401,7 +401,7 @@ textarea{resize:none;min-height:70px}
 <!-- entrada: conta obrigatória -->
 <div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="g-title">
   <div class="gate-card">
-    <div class="gate-logo"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg>Alerta Portugal</div>
+    <div class="gate-logo"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg>StreetAlert</div>
     <div id="g-login">
       <h2 id="g-title">Entrar</h2>
       <p class="lead">Para ver e marcar alertas precisas de uma conta. Cada ponto no mapa mostra o nome de quem o marcou.</p>
@@ -438,7 +438,6 @@ textarea{resize:none;min-height:70px}
     </div>
     <div class="err" id="g-err" hidden></div>
     <button type="button" class="linkbtn" id="g-out" hidden>Sair</button>
-    <p class="lead" style="margin:0;font-size:.8rem;color:var(--muted);font-weight:700">Emergência? Liga <b>112</b>.</p>
   </div>
 </div>
 
@@ -447,9 +446,8 @@ textarea{resize:none;min-height:70px}
   <div class="mcard">
     <div class="slides" id="slides">
       <div class="slide"><div class="mart"><svg width="72" height="72" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg></div>
-        <h2 id="tut-t0">Bem-vindo ao Alerta Portugal</h2>
-        <p>Um mapa feito pela comunidade para assinalar <b>violência</b> e <b>mau estacionamento</b> na tua zona. Em 30 segundos mostramos-te como funciona.</p>
-        <p>Em emergência, liga sempre <b>112</b>.</p></div>
+        <h2 id="tut-t0">Bem-vindo à StreetAlert</h2>
+        <p>Um mapa feito pela comunidade para assinalar <b>violência</b> e <b>mau estacionamento</b> na tua zona. Em 30 segundos mostramos-te como funciona.</p></div>
       <div class="slide"><div class="mart"><div class="mini"><span class="fakefab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></span><span class="chip">Arrasta o mapa</span><span class="fakebtn">É aqui!</span></div></div>
         <h2>Marcar uma ocorrência</h2>
         <p>Toca no <b>lápis amarelo</b>, arrasta o mapa até ao sítio certo e carrega em <b>É aqui!</b>. Depois escolhes o tipo, quando foi e, se quiseres, uma descrição curta.</p></div>
@@ -566,8 +564,8 @@ function isNative(){return !!safe(()=>window.Capacitor&&Capacitor.isNativePlatfo
 function showLocHelp(){
   const ios=/iPhone|iPad|iPod/.test(navigator.userAgent),and=/Android/.test(navigator.userAgent);
   $('lochelp-txt').textContent=isNative()
-    ?(ios?'Abre Definições > Alerta Portugal > Localização e escolhe "Durante a utilização da app". Depois volta aqui e toca no botão do alvo.'
-         :'Abre Definições > Apps > Alerta Portugal > Permissões > Localização e escolhe "Permitir apenas durante a utilização". Depois volta aqui e toca no botão do alvo.')
+    ?(ios?'Abre Definições > StreetAlert > Localização e escolhe "Durante a utilização da app". Depois volta aqui e toca no botão do alvo.'
+         :'Abre Definições > Apps > StreetAlert > Permissões > Localização e escolhe "Permitir apenas durante a utilização". Depois volta aqui e toca no botão do alvo.')
     :(ios?'No iPhone: Definições > Privacidade e segurança > Serviços de localização > Sites do Safari > "Durante a utilização". Depois recarrega a página e toca no botão do alvo.'
      :and?'No Chrome: toca no ícone à esquerda do endereço do site > Permissões > Localização > Permitir. Depois toca no botão do alvo.'
          :'Clica no ícone à esquerda do endereço do site, ativa a Localização e recarrega a página. Depois clica no botão do alvo.');

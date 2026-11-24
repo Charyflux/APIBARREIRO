@@ -1,4 +1,4 @@
-# Publicar o Alerta Portugal (web, Android e iOS)
+# Publicar a StreetAlert (web, Android e iOS)
 
 A app é o mesmo site (`index.html`) empacotado com [Capacitor](https://capacitorjs.com).
 Quando mudas o site, a app muda também na próxima compilação.
@@ -42,7 +42,7 @@ A app já tem entrada com conta (email ou Google), nome visível em cada reporte
    - *Redirect URLs*: adiciona `https://streetalert.online/**` e `https://www.streetalert.online/**`
 4. **Código no email.** Em **Authentication > Emails > Templates > Magic Link**, troca o texto por algo assim (o importante é o `{{ .Token }}`, que é o código que a pessoa escreve na app):
    ```html
-   <h2>O teu código do Alerta Portugal</h2>
+   <h2>O teu código do StreetAlert</h2>
    <p>Escreve este código na app: <strong style="font-size:24px">{{ .Token }}</strong></p>
    <p>Ou toca aqui para entrar: <a href="{{ .ConfirmationURL }}">Entrar</a></p>
    <p>Se não foste tu, ignora este email.</p>
@@ -126,4 +126,4 @@ npm run ios         # abre no Xcode (só em Mac)
 npm run assets      # regenera ícones e ecrã inicial a partir de assets/
 ```
 
-Identificador da app: `pt.alertaportugal.app` (em `capacitor.config.json`). Só o podes mudar antes da primeira publicação.
+Identificador da app: `pt.alertaportugal.app` (em `capacitor.config.json`). O nome visível é **StreetAlert**; o identificador interno ficou igual para não estragar as compilações já configuradas, mas ainda o podes mudar antes da primeira publicação nas lojas.

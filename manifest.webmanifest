@@ -1,6 +1,6 @@
 {
-  "name": "Alerta Portugal",
-  "short_name": "Alerta PT",
+  "name": "StreetAlert",
+  "short_name": "StreetAlert",
   "description": "Mapa comunitário de alertas de segurança e estacionamento em Portugal.",
   "lang": "pt-PT",
   "start_url": "./",

@@ -1,6 +1,6 @@
 {
   "appId": "pt.alertaportugal.app",
-  "appName": "Alerta Portugal",
+  "appName": "StreetAlert",
   "webDir": "www",
   "android": { "allowMixedContent": false },
   "ios": { "contentInset": "never" }
