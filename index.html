@@ -272,6 +272,17 @@ textarea{resize:none;min-height:70px}
 .note a,.gate a{color:var(--park);font-weight:800}
 .check{display:flex;gap:10px;align-items:flex-start;font:800 .9rem/1.4 var(--font);cursor:pointer}
 .check input{width:20px;height:20px;flex:none;margin:0;accent-color:var(--ok)}
+.fsug{list-style:none;margin:-4px 0 0;padding:6px;border-radius:16px;background:var(--card-2);display:flex;flex-direction:column;gap:2px;max-height:260px;overflow:auto;overscroll-behavior:contain}
+.fsug button{all:unset;box-sizing:border-box;display:block;width:100%;padding:10px 12px;border-radius:12px;cursor:pointer;font:800 .95rem/1.3 var(--font);color:var(--fg)}
+.fsug button small{display:block;font:700 .8rem var(--font);color:var(--muted)}
+.fsug button:hover,.fsug button[aria-selected="true"]{background:color-mix(in srgb,var(--park) 16%,var(--card))}
+.fsug .empty{padding:10px 12px;font:700 .88rem var(--font);color:var(--muted)}
+.inp.ok{border-color:var(--ok)}
+.hello{display:flex;gap:10px;align-items:center;border-radius:16px;padding:10px 12px;background:var(--card-2);font:800 .95rem/1.35 var(--font)}
+.lockmsg{display:flex;gap:10px;align-items:center;border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--viol,#ff5c8a) 16%,var(--card));color:var(--fg);font:900 .98rem/1.35 var(--font)}
+.lockmsg svg{flex:none}
+.f-lab{margin:0;font:900 .95rem var(--font)}
+.hello small{display:block;font:700 .82rem var(--font);color:var(--muted)}
 .linkbtn{border:0;background:none;color:var(--muted);font:800 .88rem var(--font);text-decoration:underline;cursor:pointer;padding:6px;align-self:center}
 .d-by{margin:-6px 0 0;font:700 .92rem var(--font);color:var(--muted)}
 .d-by b{color:var(--fg)}
@@ -442,13 +453,11 @@ textarea{resize:none;min-height:70px}
     <h2>A minha conta</h2>
     <p class="lead" id="c-email" translate="no"></p>
     <div class="err" id="c-blocked" hidden>A tua conta foi bloqueada por um administrador. Podes ver o mapa, mas não podes publicar, confirmar nem denunciar.</div>
-    <label class="f" for="c-nome">Nome que aparece nos teus reportes
-      <input class="inp" id="c-nome" maxlength="30" autocomplete="nickname">
-    </label>
-    <div class="err" id="c-err" hidden></div>
+    <p class="f-lab">Aparece assim nos teus reportes</p>
+    <div class="hello"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span><b id="c-nome" translate="no"></b><small id="c-freg" translate="no"></small></span></div>
     <div class="actions">
       <button type="button" class="btn line" id="c-close">Fechar</button>
-      <button type="button" class="btn go" id="c-save">Guardar nome</button>
+      <button type="button" class="btn go" id="c-edit">Mudar nome ou freguesia</button>
     </div>
     <a class="btn soft" id="c-admin" href="admin.html" hidden style="text-decoration:none">Painel de administração</a>
     <button type="button" class="btn soft" id="c-out">Terminar sessão</button>
@@ -461,15 +470,32 @@ textarea{resize:none;min-height:70px}
 <div class="gate" id="gate" hidden role="dialog" aria-modal="true" aria-labelledby="g-title">
   <div class="gate-card">
     <div class="gate-logo"><svg width="34" height="34" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="var(--sun)"/><path d="M12 5.5a5 5 0 0 0-5 5c0 3.6 5 8 5 8s5-4.4 5-8a5 5 0 0 0-5-5z" fill="var(--sun-ink)"/><circle cx="12" cy="10.5" r="1.9" fill="var(--sun)"/></svg>StreetAlert<button type="button" class="langbtn" data-lang-toggle></button></div>
-    <div id="g-login">
-      <h2 id="g-title">Para publicares, cria a tua conta ou entra</h2>
-      <p class="lead">Ver o mapa é livre. Para marcar alertas, confirmar ou denunciar precisas de uma conta. Escreve o teu email e enviamos-te um código: se ainda não tens conta, ela é criada nesse momento.</p>
+    <form id="g-name" hidden novalidate>
+      <h2 id="g-title">Entrar para reportar</h2>
+      <div class="lockmsg" id="g-lock"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10.5" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg><span>Para reportar, confirmar ou denunciar tens de fazer login.</span></div>
+      <p class="lead">Ver o mapa e procurar cidades ou regiões continua livre, sem login. Para entrar, diz-nos o teu nome e a tua freguesia.</p>
+      <label class="f" for="g-nome">O teu nome
+        <input class="inp" id="g-nome" maxlength="30" autocomplete="nickname" placeholder="Ex.: Ana P.">
+      </label>
+      <label class="f" for="g-freg">A tua freguesia
+        <input class="inp" id="g-freg" maxlength="140" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="search" placeholder="Começa a escrever, ex.: Arroios" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="g-freg-list">
+      </label>
+      <ul class="fsug" id="g-freg-list" role="listbox" aria-label="Freguesias" hidden></ul>
+      <div class="note" data-i18n="g-note"><b>O teu nome e a tua freguesia ficam visíveis.</b> Aparecem junto a cada ponto que marcares e podem ser vistos por qualquer pessoa que abra a app. Podes usar só o primeiro nome ou uma alcunha. O teu email e telemóvel nunca aparecem. <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>
+      <label class="check"><input type="checkbox" id="g-ok"> Percebi e aceito que o meu nome e a minha freguesia apareçam nos meus reportes.</label>
+      <button type="submit" class="btn go" id="g-save" disabled>Entrar</button>
+    </form>
+    <div id="g-login" hidden>
+      <h2 id="g-title2">Confirma o teu email</h2>
+      <div class="hello"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span><b id="g-hello-n" translate="no"></b><small id="g-hello-f" translate="no"></small></span></div>
+      <p class="lead">Para proteger o mapa de contas falsas, enviamos-te um código por email. Se ainda não tens conta, ela é criada nesse momento. O email nunca aparece a ninguém.</p>
       <button type="button" class="btn soft" id="g-google" hidden><svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Continuar com Google</button>
       <div class="or" id="g-or" hidden>ou com email</div>
       <label class="f" for="g-email">O teu email
         <input class="inp" id="g-email" type="email" autocomplete="email" inputmode="email" placeholder="nome@exemplo.pt">
       </label>
       <button type="button" class="btn go" id="g-send">Enviar código</button>
+      <button type="button" class="linkbtn" id="g-edit">Mudar nome ou freguesia</button>
     </div>
     <div id="g-code" hidden>
       <h2>Vê o teu email</h2>
@@ -478,15 +504,6 @@ textarea{resize:none;min-height:70px}
       <button type="button" class="btn go" id="g-verify">Entrar</button>
       <button type="button" class="linkbtn" id="g-back">Usar outro email</button>
     </div>
-    <form id="g-name" hidden novalidate>
-      <h2>Como te chamamos?</h2>
-      <label class="f" for="g-nome">Nome de exibição
-        <input class="inp" id="g-nome" maxlength="30" autocomplete="nickname" placeholder="Ex.: Ana P.">
-      </label>
-      <div class="note" data-i18n="g-note"><b>O teu nome fica visível.</b> Aparece junto a cada ponto que marcares e pode ser visto por qualquer pessoa que abra a app. Podes usar só o primeiro nome ou uma alcunha. O teu email e telemóvel nunca aparecem. <a href="privacidade.html" target="_blank" rel="noopener">Política de privacidade</a></div>
-      <label class="check"><input type="checkbox" id="g-ok"> Percebi e aceito que este nome apareça nos meus reportes.</label>
-      <button type="submit" class="btn go" id="g-save" disabled>Continuar</button>
-    </form>
     <div id="g-phone" hidden>
       <h2>Confirma o teu telemóvel</h2>
       <p class="lead">Enviamos um SMS com um código. O número serve só para confirmar que és uma pessoa real e não aparece a ninguém.</p>
@@ -937,7 +954,7 @@ let perfil=null,defs={},session=null,started=false,chan=null,reloadT=null,pollT=
 const store={
   async add(r){
     if(SB){const {data,error}=await SB.from('reportes').insert({cat:r.cat,lat:r.lat,lng:r.lng,descricao:r.descricao,quando:r.quando}).select('id').single();if(error)throw error;
-      reports.push({...r,id:data.id,autor:me,autorNome:perfil&&perfil.nome,confirmacoes:{}});queueLoad();return data.id}
+      reports.push({...r,id:data.id,autor:me,confirmacoes:{}});queueLoad();return data.id}
     if(db){const ref=await db.collection('ocorrencias').add(r);return ref.id}const id='l'+Date.now();reports.push({...r,id});saveLocal();render();return id},
   async remove(id){
     if(SB){const {error}=await SB.from('reportes').delete().eq('id',id);if(error)throw error;reports=reports.filter(r=>r.id!==id);render();return}
@@ -956,6 +973,7 @@ async function connect(){
     SB.auth.onAuthStateChange((ev,s)=>{setTimeout(()=>onAuth(ev,s),0)});
     startLive();onboard(); // o mapa e os reportes estão abertos a todos, mesmo sem sessão
     return}
+  $('acct').hidden=false; // sem Supabase, a "sessão" (nome + freguesia) fica neste aparelho
   let d=null,u=null;
   if(window.claude&&claude.use){[d,u]=await Promise.all([claude.use('db').catch(()=>null),claude.use('user').catch(()=>null)])}
   if(u)me=await Promise.resolve(safe(()=>u.id(),null)).catch(()=>null);
@@ -970,8 +988,11 @@ async function connect(){
 function gate(step){
   $('gate').hidden=!step;
   for(const k of ['login','code','name','phone'])$('g-'+k).hidden=k!==step;
-  $('g-err').hidden=true;$('g-out').hidden=!(step==='name'||step==='phone');
-  $('g-close').hidden=!(step==='login'||step==='code');
+  $('gate').setAttribute('aria-labelledby',step==='login'?'g-title2':'g-title');
+  $('g-err').hidden=true;hideSug();
+  const signed=!!(WANT_SB&&session);
+  $('g-out').hidden=!(signed&&(step==='name'||step==='phone'));
+  $('g-close').hidden=!(step==='login'||step==='code'||step==='name');
 }
 // Ver é livre; publicar, confirmar e denunciar exigem conta. A ação pedida fica guardada
 // (também se o login sair da página, como no Google) e continua depois de entrar.
@@ -979,17 +1000,32 @@ const K_PEND='ap-pending-v1';
 const pend={get:()=>safe(()=>JSON.parse(sessionStorage.getItem(K_PEND)||'null'),null),
   set:v=>safe(()=>v?sessionStorage.setItem(K_PEND,JSON.stringify(v)):sessionStorage.removeItem(K_PEND))};
 let profChecked=false;
-function accountStep(){if(!session)return 'login';if(!perfil)return 'name';
+// Quem é a pessoa: nome + freguesia. Sem Supabase fica só neste aparelho (localMe); com Supabase
+// fica no perfil da conta. "quem" guarda o que foi escrito antes de confirmar o email (sobrevive ao
+// login com Google ou pelo link do email, que recarregam a página).
+const K_ME='ap-conta-v1',K_QUEM='ap-quem-v1';
+const validWho=w=>w&&typeof w.nome==='string'&&typeof w.freguesia==='string'&&typeof w.concelho==='string'&&!nameIssue(cleanName(w.nome))?{nome:cleanName(w.nome).slice(0,30),freguesia:w.freguesia,concelho:w.concelho}:null;
+const readWho=k=>safe(()=>validWho(JSON.parse(localStorage.getItem(k)||'null')),null);
+const writeWho=(k,v)=>safe(()=>v?localStorage.setItem(k,JSON.stringify(v)):localStorage.removeItem(k));
+let localMe=WANT_SB?null:readWho(K_ME);
+const quem={get:()=>readWho(K_QUEM),set:v=>writeWho(K_QUEM,v)};
+const fregLabel=(f,c)=>f?(f===c?f:f+', '+c):'';
+function whoNow(){return WANT_SB?(perfil&&perfil.freguesia?{nome:perfil.nome,freguesia:perfil.freguesia,concelho:perfil.concelho}:null):localMe}
+function accountStep(){
+  if(!WANT_SB)return localMe?null:'name';
+  if(!session)return quem.get()?'login':'name';
+  if(!perfil||!perfil.freguesia)return 'name';
   if(defs.exigir_telemovel&&!session.user.phone_confirmed_at&&!perfil.admin)return 'phone';return null}
+function openStep(st){if(st==='name')return openWho();if(st==='login')return openLogin();gate(st)}
 function needAccount(p){
-  if(!WANT_SB)return true;
-  if(!SB){toast(t('Não foi possível ligar ao servidor. Verifica a internet e recarrega a página.'));return false}
-  if(session&&!profChecked){toast(t('Um momento…'));return false}
+  if(WANT_SB&&!SB){toast(t('Não foi possível ligar ao servidor. Verifica a internet e recarrega a página.'));return false}
+  if(WANT_SB&&session&&!profChecked){toast(t('Um momento…'));return false}
   const st=accountStep();
-  if(!st){if(perfil.bloqueado){toast(t('A tua conta está bloqueada'));return false}return true}
-  pend.set(p||null);gate(st);if(st==='login')setTimeout(()=>$('g-email').focus(),50);return false}
+  if(!st){if(WANT_SB&&perfil.bloqueado){toast(t('A tua conta está bloqueada'));return false}return true}
+  pend.set(p||null);openStep(st);return false}
 async function runPending(){const p=pend.get();if(!p)return;pend.set(null);
-  if(!perfil||perfil.bloqueado){if(perfil)toast(t('A tua conta está bloqueada'));return}
+  if(accountStep())return;
+  if(WANT_SB&&perfil.bloqueado){toast(t('A tua conta está bloqueada'));return}
   if(p.type==='aim'){closeAll();if(p.lat!=null)map.setView([p.lat,p.lng],Math.max(p.z||12,12),{animate:false});else if(map.getZoom()<12)map.setZoom(12);setUI('aim')}
   else if(p.type==='confirm'||p.type==='flag'){const r=reports.find(x=>x.id===p.id);if(!r)return;
     if(!current||current.id!==r.id||$('s-detail').hidden)showDetail(r,false,true);
@@ -1002,6 +1038,7 @@ function errMsg(e){const m=String((e&&(e.message||e.error_description||e.msg))||
   if(lim)return lim[1]==='1'?t('Chegaste ao limite de 1 reporte por dia. Tenta outra vez amanhã.'):t('Chegaste ao limite de {n} reportes por dia. Tenta outra vez amanhã.',{n:lim[1]});
   if(/data_invalida/.test(m))return t('A data tem de estar nos últimos 30 dias.');
   if(/duplicate key/.test(m))return t('Já tinhas feito isto antes.');
+  if(/perfis_freguesia|foreign key/.test(m))return t('Escolhe a tua freguesia na lista.');
   if(/row-level security|permission denied/.test(m)){
     if(perfil&&perfil.bloqueado)return t('A tua conta está bloqueada.');
     if(defs.exigir_telemovel&&!(session&&session.user.phone_confirmed_at))return t('Confirma primeiro o teu telemóvel.');
@@ -1023,17 +1060,95 @@ async function afterLogin(){
   me=session.user.id;
   const [p,d]=await Promise.all([SB.from('perfis').select('*').eq('id',me).maybeSingle(),SB.from('definicoes').select('*').eq('id',1).maybeSingle()]);
   if(p.error){gate('login');gerr(errMsg(p.error));return}
-  defs=d.data||{};perfil=p.data;profChecked=true;
-  if(!perfil){gate('name');const md=session.user.user_metadata||{};$('g-nome').value=String(md.full_name||md.name||'').split(' ')[0].slice(0,30);$('g-ok').checked=false;checkName();return}
+  defs=d.data||{};perfil=p.data;
+  // O nome e a freguesia escritos no ecrã de entrada passam para o perfil (cria-o ou atualiza-o).
+  const q=quem.get();quem.set(null);
+  if(q&&(!perfil||perfil.nome!==q.nome||perfil.freguesia!==q.freguesia||perfil.concelho!==q.concelho)&&!(perfil&&perfil.bloqueado)){
+    const err=await saveProfile(q);
+    if(err){profChecked=true;openWho(q);gerr(errMsg(err));return}
+    const r=await SB.from('perfis').select('*').eq('id',me).maybeSingle();if(!r.error)perfil=r.data}
+  profChecked=true;
+  if(!perfil||!perfil.freguesia){openWho();return}
   if(defs.exigir_telemovel&&!session.user.phone_confirmed_at&&!perfil.admin){gate('phone');return}
   gate(null);$('acct').hidden=false;
   if(started)await loadReports();else startLive(); // volta a ler: agora já se sabe o que é meu
   onboard();runPending();
 }
-const cleanName=v=>v.replace(/\s+/g,' ').trim();
-function nameIssue(n){if(n.length<2)return t('O nome precisa de pelo menos 2 letras.');if(/[@<>]|https?:|www\./i.test(n))return t('Usa só um nome, sem emails nem links.');return null}
-function checkName(){const n=cleanName($('g-nome').value);$('g-save').disabled=!!nameIssue(n)||!$('g-ok').checked}
+function cleanName(v){return String(v).replace(/\s+/g,' ').trim()}
+function nameIssue(n){if(n.length<2)return t('O nome precisa de pelo menos 2 letras.');if(n.length>30)return t('O nome pode ter até 30 letras.');if(/[@<>]|https?:|www\./i.test(n))return t('Usa só um nome, sem emails nem links.');return null}
+async function saveProfile(w){
+  const row={nome:w.nome,freguesia:w.freguesia,concelho:w.concelho};
+  const {error}=perfil?await SB.from('perfis').update(row).eq('id',me):await SB.from('perfis').insert({id:me,...row});
+  return error||null}
+
+// ---------- freguesia: lista oficial (CAOP), carregada só quando é precisa ----------
+let FREG=null,fregP=null,fregSel=null,sugI=-1,sugItems=[];
+function loadFreg(){return fregP||(fregP=fetch('freguesias.json').then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()})
+  .then(a=>FREG=a.map(([f,c])=>({f,c,k:norm(f+' '+c),kf:norm(f).replace(/^uniao das freguesias de /,''),kc:norm(c)}))).catch(e=>{fregP=null;throw e}))}
+function fregSearch(q){
+  const w=norm(q).replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(Boolean);if(!w.length||!FREG)return [];
+  const hit=FREG.filter(x=>w.every(p=>x.k.includes(p)));
+  const q1=w.join(' '),sc=x=>{const ws=x.kf.split(/[\s,()]+/);
+    return (x.kf.startsWith(q1)?0:ws.some(p=>p.startsWith(w[0]))?1:x.kc.startsWith(q1)?2:3)*1000
+      +(ws.includes(w[0])?0:300)+(x.kc===q1||x.kc.startsWith(q1+' ')?0:150)+x.f.length};
+  return hit.sort((a,b)=>sc(a)-sc(b)).slice(0,8)}
+function hideSug(){$('g-freg-list').hidden=true;$('g-freg').setAttribute('aria-expanded','false');sugI=-1}
+function showSug(){
+  const q=$('g-freg').value,box=$('g-freg-list');box.innerHTML='';sugItems=[];sugI=-1;
+  if(fregSel||norm(q).trim().length<2){hideSug();return}
+  if(!FREG){box.innerHTML='<li class="empty"></li>';box.firstChild.textContent=t('A carregar freguesias…');box.hidden=false;
+    loadFreg().then(()=>{if(!$('gate').hidden)showSug()},()=>{box.firstChild.textContent=t('Não deu para carregar a lista de freguesias. Verifica a internet e tenta outra vez.')});return}
+  sugItems=fregSearch(q);
+  if(!sugItems.length){box.innerHTML='<li class="empty"></li>';box.firstChild.textContent=t('Não encontrámos essa freguesia. Experimenta outro nome ou o nome do concelho.')}
+  sugItems.forEach((x,i)=>{const li=document.createElement('li'),b=document.createElement('button');b.type='button';b.id='g-fs'+i;
+    b.setAttribute('role','option');b.setAttribute('aria-selected','false');b.translate=false;
+    const sm=document.createElement('small');sm.textContent=t('Concelho de {c}',{c:x.c});b.append(x.f,sm);
+    b.addEventListener('pointerdown',e=>e.preventDefault()); // não tira o foco do campo antes do clique
+    b.onclick=()=>pickFreg(x);li.append(b);box.append(li)});
+  box.hidden=false;$('g-freg').setAttribute('aria-expanded','true')}
+function markSug(i){sugI=i;[...$('g-freg-list').querySelectorAll('button')].forEach((b,j)=>{b.setAttribute('aria-selected',String(j===i));if(j===i)b.scrollIntoView({block:'nearest'})});
+  if(i>=0)$('g-freg').setAttribute('aria-activedescendant','g-fs'+i);else $('g-freg').removeAttribute('aria-activedescendant')}
+function pickFreg(x){fregSel=x?{f:x.f,c:x.c}:null;if(x)$('g-freg').value=fregLabel(x.f,x.c);$('g-freg').classList.toggle('ok',!!x);hideSug();checkName()}
+$('g-freg').addEventListener('input',()=>{fregSel=null;$('g-freg').classList.remove('ok');
+  if(FREG){const v=norm($('g-freg').value).trim(),ex=FREG.find(x=>norm(fregLabel(x.f,x.c))===v);if(ex){pickFreg(ex);return}}
+  showSug();checkName()});
+$('g-freg').addEventListener('focus',()=>{loadFreg().catch(()=>{});if(!fregSel)showSug()});
+$('g-freg').addEventListener('blur',()=>setTimeout(hideSug,150));
+$('g-freg').addEventListener('keydown',e=>{const n=sugItems.length;
+  if(e.key==='ArrowDown'&&n){e.preventDefault();if($('g-freg-list').hidden)showSug();markSug((sugI+1)%n)}
+  else if(e.key==='ArrowUp'&&n){e.preventDefault();markSug((sugI-1+n)%n)}
+  else if(e.key==='Enter'){e.preventDefault();if(n&&!$('g-freg-list').hidden)pickFreg(sugItems[Math.max(sugI,0)])}
+  else if(e.key==='Escape'&&!$('g-freg-list').hidden){e.stopPropagation();hideSug()}});
+function checkName(){const n=cleanName($('g-nome').value);$('g-save').disabled=!!nameIssue(n)||!fregSel||!$('g-ok').checked}
 $('g-nome').oninput=checkName;$('g-ok').onchange=checkName;
+// Ecrã de entrada: nome + freguesia (com Supabase, a seguir confirma o email).
+function openWho(pre){
+  const w=pre||whoNow()||quem.get()||(WANT_SB?null:readWho(K_ME));
+  let nome=w?w.nome:'';
+  if(!nome&&WANT_SB&&session){const md=session.user.user_metadata||{};nome=String(md.full_name||md.name||'').split(' ')[0].slice(0,30)}
+  $('g-nome').value=nome;fregSel=w?{f:w.freguesia,c:w.concelho}:null;$('g-freg').value=w?fregLabel(w.freguesia,w.concelho):'';
+  $('g-freg').classList.toggle('ok',!!fregSel);$('g-ok').checked=!!(w&&whoNow());
+  $('g-save').textContent=t(WANT_SB&&!session?'Continuar':(whoNow()?'Guardar':'Entrar'));
+  gate('name');checkName();loadFreg().catch(()=>{});
+  setTimeout(()=>$(nome?'g-freg':'g-nome').focus(),50)}
+function openLogin(){const q=quem.get();if(!q){openWho();return}
+  $('g-hello-n').textContent=q.nome;$('g-hello-f').textContent=fregLabel(q.freguesia,q.concelho);
+  gate('login');setTimeout(()=>$('g-email').focus(),50)}
+$('g-edit').onclick=()=>openWho(quem.get());
+$('g-name').addEventListener('submit',e=>{e.preventDefault();hideSug();
+  const n=cleanName($('g-nome').value),issue=nameIssue(n);if(issue)return gerr(issue);
+  if(!fregSel)return gerr(t('Escolhe a tua freguesia na lista.'));
+  if(!$('g-ok').checked)return gerr(t('Confirma que aceitas que o nome e a freguesia apareçam.'));
+  const w={nome:n,freguesia:fregSel.f,concelho:fregSel.c};
+  busy($('g-save'),async()=>{
+    if(FREG===null)await loadFreg().catch(()=>{});
+    if(FREG&&!FREG.some(x=>x.f===w.freguesia&&x.c===w.concelho))return gerr(t('Escolhe a tua freguesia na lista.'));
+    if(!WANT_SB){const was=localMe;localMe=w;writeWho(K_ME,w);
+      for(const r of reports)if(r.autor==='local'&&was){r.autorNome=w.nome;r.autorFreg=fregLabel(w.freguesia,w.concelho)}
+      saveLocal();gate(null);render();toast(t(was?'Dados guardados':'Olá, {n}! Já podes reportar.',{n:w.nome}));runPending();return}
+    if(!session){quem.set(w);openLogin();return}
+    const err=await saveProfile(w);if(err)return gerr(errMsg(err));
+    const had=perfil&&perfil.freguesia;await afterLogin();if(had)toast(t('Dados guardados'))})});
 $('g-send').onclick=()=>busy($('g-send'),async()=>{const e=$('g-email').value.trim();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))return gerr(t('Escreve um email válido.'));
   const {error}=await SB.auth.signInWithOtp({email:e,options:{shouldCreateUser:true,emailRedirectTo:NATIVE?undefined:location.origin+location.pathname}});
@@ -1042,10 +1157,8 @@ $('g-email').onkeydown=e=>{if(e.key==='Enter')$('g-send').click()};
 $('g-verify').onclick=()=>busy($('g-verify'),async()=>{const code=$('g-otp').value.replace(/\s/g,'');if(!code)return gerr(t('Escreve o código que recebeste.'));
   const {error}=await SB.auth.verifyOtp({email:$('g-to').textContent,token:code,type:'email'});if(error)gerr(errMsg(error))});
 $('g-otp').onkeydown=e=>{if(e.key==='Enter')$('g-verify').click()};
-$('g-back').onclick=()=>gate('login');
+$('g-back').onclick=()=>openLogin();
 $('g-google').onclick=()=>SB.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}}).then(({error})=>{if(error)gerr(errMsg(error))});
-$('g-name').addEventListener('submit',e=>{e.preventDefault();const n=cleanName($('g-nome').value);const issue=nameIssue(n);if(issue)return gerr(issue);
-  busy($('g-save'),async()=>{const {error}=await SB.from('perfis').insert({id:me,nome:n});if(error)return gerr(errMsg(error));await afterLogin()})});
 const e164=t=>{t=t.replace(/[\s.()-]/g,'');if(/^9\d{8}$/.test(t))return '+351'+t;if(/^00\d+$/.test(t))return '+'+t.slice(2);return t};
 $('g-tel-send').onclick=()=>busy($('g-tel-send'),async()=>{const ph=e164($('g-tel').value);if(!/^\+\d{9,15}$/.test(ph))return gerr(t('Escreve um número válido, por exemplo 912 345 678.'));
   const {error}=await SB.auth.updateUser({phone:ph});if(error)return gerr(errMsg(error));$('g-err').hidden=true;$('g-sms').hidden=$('g-tel-verify').hidden=false;$('g-sms').focus()});
@@ -1056,10 +1169,10 @@ $('g-out').onclick=()=>SB.auth.signOut();
 // ---------- reportes ao vivo ----------
 async function loadReports(){
   const since=new Date(Date.now()-90*864e5).toISOString();
-  const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,criado,user_id,oculto,perfis(nome),confirmacoes(user_id)').gte('quando',since).order('quando',{ascending:false}).limit(3000);
+  const {data,error}=await SB.from('reportes').select('id,cat,lat,lng,descricao,quando,criado,user_id,oculto,perfis(nome,freguesia,concelho),confirmacoes(user_id)').gte('quando',since).order('quando',{ascending:false}).limit(3000);
   if(error){live('Erro');return}
   reports=data.filter(x=>!x.oculto||x.user_id===me).map(x=>({id:x.id,cat:x.cat,lat:x.lat,lng:x.lng,descricao:x.descricao,quando:x.quando,criado:x.criado,autor:x.user_id,
-    autorNome:(x.perfis&&x.perfis.nome)||t('Utilizador'),oculto:x.oculto,confirmacoes:Object.fromEntries((x.confirmacoes||[]).map(c=>[c.user_id,true]))}));
+    autorNome:(x.perfis&&x.perfis.nome)||t('Utilizador'),autorFreg:x.perfis?fregLabel(x.perfis.freguesia,x.perfis.concelho):'',oculto:x.oculto,confirmacoes:Object.fromEntries((x.confirmacoes||[]).map(c=>[c.user_id,true]))}));
   live('Ao vivo',true);render();
   if(current&&!$('s-detail').hidden){const c=reports.find(r=>r.id===current.id);if(c)showDetail(c,true);else closeAll()}
 }
@@ -1073,16 +1186,16 @@ function stopLive(){started=false;clearInterval(pollT);if(chan){SB.removeChannel
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&started)queueLoad()});
 
 // ---------- a minha conta ----------
-$('acct').onclick=()=>{closeAll();if(!SB)return;const st=accountStep();if(st){gate(st);return}
-  $('c-email').textContent=session.user.email||session.user.phone||'';$('c-nome').value=perfil.nome;$('c-err').hidden=true;
-  $('c-blocked').hidden=!perfil.bloqueado;$('c-admin').hidden=!perfil.admin;$('c-del').dataset.c='';$('c-del').textContent=t('Apagar a minha conta');
+$('acct').onclick=()=>{closeAll();if(WANT_SB&&!SB)return;if(WANT_SB&&session&&!profChecked){toast(t('Um momento…'));return}
+  const st=accountStep();if(st){openStep(st);return}
+  const w=whoNow();$('c-nome').textContent=w.nome;$('c-freg').textContent=fregLabel(w.freguesia,w.concelho);
+  $('c-email').textContent=WANT_SB?(session.user.email||session.user.phone||''):t('Sessão guardada só neste aparelho.');
+  $('c-blocked').hidden=!(WANT_SB&&perfil.bloqueado);$('c-admin').hidden=!(WANT_SB&&perfil.admin);$('c-del').hidden=!WANT_SB;
+  $('c-edit').hidden=!!(WANT_SB&&perfil.bloqueado);$('c-del').dataset.c='';$('c-del').textContent=t('Apagar a minha conta');
   $('s-conta').hidden=false;setUI('sheet')};
 $('c-close').onclick=closeAll;
-$('c-save').onclick=()=>busy($('c-save'),async()=>{const n=cleanName($('c-nome').value);const issue=nameIssue(n);
-  if(issue){$('c-err').textContent=issue;$('c-err').hidden=false;return}
-  const {error}=await SB.from('perfis').update({nome:n}).eq('id',me);if(error){$('c-err').textContent=errMsg(error);$('c-err').hidden=false;return}
-  perfil.nome=n;for(const r of reports)if(r.autor===me)r.autorNome=n;closeAll();render();toast(t('Nome guardado'))});
-$('c-out').onclick=()=>SB.auth.signOut();
+$('c-edit').onclick=()=>{closeAll();openWho()};
+$('c-out').onclick=()=>{if(WANT_SB)return SB.auth.signOut();localMe=null;writeWho(K_ME,null);closeAll();toast(t('Sessão terminada'))};
 $('c-del').onclick=()=>{const b=$('c-del');if(b.dataset.c!=='1'){b.dataset.c='1';b.textContent=t('Toca outra vez: apaga a conta e todos os teus reportes');return}
   busy(b,async()=>{const {error}=await SB.rpc('apagar_conta');if(error){toast(errMsg(error));return}await SB.auth.signOut();toast(t('Conta apagada'))})};
 
@@ -1126,7 +1239,7 @@ function renderList(){
     b.innerHTML=`<span class="ic">${badge(r.cat,34)}</span><span><strong></strong><p></p><small></small></span>`;
     b.querySelector('strong').textContent=catLabel(r.cat);
     const p=b.querySelector('p');if(r.descricao)p.textContent=r.descricao;else p.remove();
-    b.querySelector('small').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'')+(r.autorNome?LG(' · por ',' · by ')+r.autorNome:'')+(posted(r.criado||r.quando)?(r.autorNome?LG(' a ',' on '):LG(' · publicado a ',' · posted on '))+posted(r.criado||r.quando):'');
+    b.querySelector('small').textContent=ago(r.quando)+(cities.length?' · '+nearest(r.lat,r.lng):'')+(r.autorNome?LG(' · por ',' · by ')+r.autorNome+(r.autorFreg?' ('+r.autorFreg+')':''):'')+(posted(r.criado||r.quando)?(r.autorNome?LG(' a ',' on '):LG(' · publicado a ',' · posted on '))+posted(r.criado||r.quando):'');
     b.onclick=()=>{if(window.innerWidth<760)toggleList(false);map.flyTo([r.lat,r.lng],Math.max(map.getZoom(),13),{duration:.8});showDetail(r,false,true)};
     box.append(b)}
 }
@@ -1255,7 +1368,7 @@ function closeAll(){['s-cat','s-form','s-detail','s-conta'].forEach(i=>$(i).hidd
 $('fab').onclick=()=>{closeAll();const c=map.getCenter();if(!needAccount({type:'aim',lat:c.lat,lng:c.lng,z:map.getZoom()}))return;if(map.getZoom()<12)map.setZoom(12);setUI('aim')};
 $('place-cancel').onclick=closeAll;
 $('place-ok').onclick=()=>{const c=map.getCenter();startReport(c)};
-map.on('click',e=>{if(!$('placebar').hidden)return;if(WANT_SB&&(!SB||accountStep()||perfil.bloqueado))return;startReport(e.latlng)}); // sem conta, tocar no mapa não abre nada
+map.on('click',e=>{if(!$('placebar').hidden)return;if(WANT_SB&&!SB)return;if(accountStep()||(WANT_SB&&perfil.bloqueado))return;startReport(e.latlng)}); // sem conta, tocar no mapa não abre nada
 function startReport(ll){
   closeAll();
   draft={lat:+ll.lat.toFixed(4),lng:+ll.lng.toFixed(4)};
@@ -1266,7 +1379,7 @@ function startReport(ll){
 $('cat-cancel').onclick=closeAll;$('form-cancel').onclick=closeAll;
 document.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{draftCat=b.dataset.cat;
   $('ch-ic').innerHTML=badge(draftCat,36);$('ch-name').textContent=catLabel(draftCat);
-  $('s-cat').hidden=true;$('s-form').hidden=false;setWhen(0);$('f-who').hidden=!(SB&&perfil);if(SB&&perfil){$('f-who').textContent='';const wb=document.createElement('b');wb.textContent=perfil.nome;$('f-who').append(t('Vai aparecer como publicado por')+' ',wb,'.')}$('desc').value='';$('count').textContent='0 / 140';validate()});
+  $('s-cat').hidden=true;$('s-form').hidden=false;setWhen(0);const w=whoNow();$('f-who').hidden=!w;if(w){$('f-who').textContent='';const wb=document.createElement('b');wb.textContent=w.nome;$('f-who').append(t('Vai aparecer como publicado por')+' ',wb,' · '+fregLabel(w.freguesia,w.concelho)+'.')}$('desc').value='';$('count').textContent='0 / 140';validate()});
 $('ch-change').onclick=()=>{$('s-form').hidden=true;$('s-cat').hidden=false};
 function nowLocal(off){const d=new Date(Date.now()-(off||0)*6e4);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
 function setWhen(min){
@@ -1298,6 +1411,7 @@ function validate(){
 $('s-form').addEventListener('submit',async e=>{
   e.preventDefault();if(!validate())return;$('save').disabled=true;
   const r={cat:draftCat,lat:draft.lat,lng:draft.lng,descricao:$('desc').value.trim().slice(0,140),quando:new Date($('when').value).toISOString(),criado:new Date().toISOString(),autor:me||'local',confirmacoes:{}};
+  {const w=whoNow();if(w){r.autorNome=w.nome;r.autorFreg=fregLabel(w.freguesia,w.concelho)}}
   try{const id=await store.add(r);fresh.add(id);
     if(!active[r.cat]){active[r.cat]=true;$('f-'+r.cat).setAttribute('aria-pressed','true')}
     if(+$('period').value===1&&Date.now()-new Date(r.quando)>864e5)$('period').value='7';
@@ -1323,8 +1437,8 @@ function showDetail(r,keep,nopan){
   const own=r.autor===(me||'local');
   $('d-del').hidden=!(own||(SB&&perfil&&perfil.admin));$('d-del').dataset.c='';$('d-del').textContent=t(own?'Apagar o meu reporte':'Apagar (administrador)');
   const pq=posted(r.criado||r.quando);$('d-by').hidden=!(r.autorNome||pq);$('d-by').textContent='';
-  if(r.autorNome){const nb=document.createElement('b');nb.textContent=r.autorNome;$('d-by').append(t('Publicado por')+' ',nb,own?' '+t('(tu)'):'')}
-  if(pq){const tb=document.createElement('b');tb.textContent=pq;$('d-by').append(r.autorNome?LG(' a ',' on '):LG('Publicado a ','Posted on '),tb)}
+  if(r.autorNome){const nb=document.createElement('b');nb.textContent=r.autorNome;$('d-by').append(t('Publicado por')+' ',nb,own?' '+t('(tu)'):'');if(r.autorFreg)$('d-by').append(LG(', de ',', from '),r.autorFreg)}
+  if(pq){const tb=document.createElement('b');tb.textContent=pq;$('d-by').append(r.autorNome?LG(r.autorFreg?', a ':' a ',r.autorFreg?', on ':' on '):LG('Publicado a ','Posted on '),tb)}
   if(r.oculto)$('d-by').append(' · '+t('escondido após denúncias, à espera de revisão'));
   $('d-flag').hidden=!(SB&&!own);$('d-flagbox').hidden=true;
   $('s-detail').hidden=false;setUI('sheet');

@@ -19,6 +19,10 @@ Revisão de segurança do código (novembro de 2026): site estático no GitHub P
   com `textContent` ou escapado. Não uses `innerHTML` com estes dados.
 - **Regras da base de dados:** quem não tem conta só lê o mapa; publicar, confirmar e denunciar exigem conta não bloqueada;
   ninguém altera reportes; admin e bloqueio só mudam por funções que confirmam que és administrador.
+- **Entrada com nome e freguesia:** publicar exige sessão (email confirmado ou Google) e um perfil com nome e freguesia
+  (`pode_publicar()`). A freguesia é validada no servidor com uma chave estrangeira para a tabela `freguesias` (lista
+  oficial CAOP): pela API não se grava uma freguesia inventada nem num concelho errado. A tabela `freguesias` não pode
+  ser lida nem alterada por `anon`/`authenticated`. O perfil só deixa mudar `nome`, `freguesia` e `concelho`.
 
 ## Depois de cada mudança em `supabase/schema.sql`
 Volta a correr o ficheiro inteiro no Supabase (SQL Editor > New query > Run). Pode correr-se várias vezes.

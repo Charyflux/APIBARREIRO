@@ -32,9 +32,21 @@ Em **Settings > Pages** confirma que *Custom domain* mostra `streetalert.online`
 
 ## Contas e base de dados partilhada (Supabase)
 
-A app já tem entrada com conta (email ou Google), nome visível em cada reporte, denúncias, bloqueio de contas, limite diário para contas novas e um painel de administração (`admin.html`). Tudo isto usa o [Supabase](https://supabase.com), que é gratuito para começar.
+A app já tem entrada com conta (nome, freguesia e email ou Google), nome e freguesia visíveis em cada reporte, denúncias, bloqueio de contas, limite diário para contas novas e um painel de administração (`admin.html`). Tudo isto usa o [Supabase](https://supabase.com), que é gratuito para começar.
 
-**Enquanto `config.js` estiver vazio, o site continua a funcionar como antes** (alertas só no aparelho, sem conta). Assim que preencheres `config.js`, qualquer pessoa vê o mapa e os reportes sem conta, e a conta passa a ser pedida só para publicar, confirmar ou denunciar.
+### Regra de entrada
+
+Qualquer pessoa abre o site, vê o mapa e procura cidades ou regiões **sem entrar**. Para **publicar** (e também confirmar ou denunciar) é obrigatório entrar. Ao tocar em **Reportar** sem sessão abre o ecrã **Entrar para reportar**, que pede:
+1. **Nome** (2 a 30 letras, sem emails nem links) e **freguesia**, escolhida da lista oficial de freguesias de Portugal (escreve-se parte do nome e a app sugere, com o concelho por baixo). A pessoa aceita que o nome e a freguesia apareçam nos reportes.
+2. **Com Supabase ligado:** confirma o email com um código (ou Google). Só depois disto a conta pode publicar. Sem `config.js` preenchido, este passo não existe e a "sessão" (nome + freguesia) fica só nesse aparelho.
+
+Depois de entrar, o reporte continua logo do ponto onde a pessoa estava. Cada reporte mostra "por Ana (Arroios, Lisboa)". Nome e freguesia mudam-se em **A minha conta > Mudar nome ou freguesia**.
+
+No servidor (`supabase/schema.sql`) a regra também vale: só contas com sessão, perfil com freguesia e não bloqueadas podem publicar, e a freguesia tem de existir na tabela `freguesias` (não se consegue gravar outra, nem pela API).
+
+A lista de freguesias (`freguesias.json` e o bloco no fim de `schema.sql`) é a CAOP 2020 da DGT, com 3092 freguesias e 308 concelhos. É gerada por `scripts/build_freguesias.py`. Não inclui ainda as freguesias repostas em 2025; quem for de uma dessas escolhe a união de freguesias a que pertencia.
+
+**Enquanto `config.js` estiver vazio, o site continua a funcionar sem servidor** (alertas só no aparelho), mas já pede nome e freguesia para reportar. Assim que preencheres `config.js`, qualquer pessoa vê o mapa e os reportes sem conta, e a conta passa a ser pedida só para publicar, confirmar ou denunciar.
 
 ### Passos que só tu podes fazer
 
@@ -53,7 +65,7 @@ A app já tem entrada com conta (email ou Google), nome visível em cada reporte
    Faz o mesmo em **Confirm signup**.
 5. **Envio de emails a sério.** O envio de emails que vem com o Supabase só manda poucos emails por hora e serve apenas para testes. Antes de divulgar a app, em **Authentication > Emails > SMTP Settings** liga um serviço de email (por exemplo Brevo ou Resend, ambos têm plano gratuito).
 6. **Ligar o site.** Em **Project Settings > API Keys** copia o *Project URL* e a chave **anon public** (separador *Legacy API keys*, se aparecer). Edita `config.js` no GitHub e cola-os em `supabaseUrl` e `supabaseAnonKey`. Esta chave pode ser pública. **Nunca** coloques a chave `service_role`.
-7. **Tornar-te administrador.** Abre o site, entra com o teu email e escolhe o teu nome. Depois, no **SQL Editor**, corre (com o teu email):
+7. **Tornar-te administrador.** Abre o site, toca em Reportar, escreve o teu nome e freguesia e entra com o teu email. Depois, no **SQL Editor**, corre (com o teu email):
    ```sql
    update public.perfis set admin = true
    where id = (select id from auth.users where email = 'o-teu-email@exemplo.pt');
