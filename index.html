@@ -201,6 +201,19 @@ textarea{resize:none;min-height:70px}
 .langbtn:active{transform:scale(.95)}
 .gate-logo .langbtn,.mcard .langbtn{margin-left:auto;box-shadow:none;background:var(--card-2)}
 .mtop{display:flex;justify-content:flex-end;margin:-6px -4px -4px}
+/* botões do mapa com cores de destaque */
+.ctrls .round.hl{color:#fff;background:var(--b);box-shadow:0 4px 0 var(--bd),0 8px 18px color-mix(in srgb,var(--b) 45%,transparent);transition:transform .12s,box-shadow .12s}
+.ctrls .round.hl:hover{filter:brightness(1.08)}
+.ctrls .round.hl:active{transform:translateY(3px);box-shadow:0 1px 0 var(--bd),0 3px 8px color-mix(in srgb,var(--b) 40%,transparent)}
+#locate{--b:#2f7bff;--bd:#1c4fb8}
+#home{--b:#8b5cf6;--bd:#5b34b8}
+#help{--b:#0d9488;--bd:#0a5f58}
+#acct{--b:#18a35f;--bd:#0f6b3e}
+.ctrls .langbtn{color:rgba(255,255,255,.75);background:linear-gradient(135deg,#ff5c8a,#ff8a3d);box-shadow:0 4px 0 #b8325a,0 8px 18px rgba(255,92,138,.4);padding:9px 13px;transition:transform .12s,box-shadow .12s}
+.ctrls .langbtn svg,.ctrls .langbtn .on{color:#fff}
+.ctrls .langbtn .on{background:rgba(0,0,0,.22);border-radius:999px;padding:1px 6px}
+.ctrls .langbtn:hover{filter:brightness(1.06)}
+.ctrls .langbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #b8325a,0 3px 8px rgba(255,92,138,.35)}
 
 .me-dot{width:18px;height:18px;border-radius:50%;background:#2f7bff;border:3px solid #fff;box-shadow:0 0 0 2px rgba(47,123,255,.35),0 2px 6px rgba(0,0,0,.35);box-sizing:border-box}
 @media (prefers-reduced-motion:no-preference){.me-dot{animation:mepulse 2s ease-out infinite}@keyframes mepulse{0%{box-shadow:0 0 0 0 rgba(47,123,255,.55),0 2px 6px rgba(0,0,0,.35)}100%{box-shadow:0 0 0 16px rgba(47,123,255,0),0 2px 6px rgba(0,0,0,.35)}}}
@@ -295,11 +308,11 @@ textarea{resize:none;min-height:70px}
   <span class="gap"></span>
   <button class="round" id="zin" aria-label="Aproximar">+</button>
   <button class="round" id="zout" aria-label="Afastar">−</button>
-  <button class="round" id="locate" aria-label="Centrar em mim" title="Centrar em mim"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg></button>
-  <button class="round" id="home" aria-label="Ver Portugal inteiro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M12 2 4 21l8-4 8 4z"/></svg></button>
-  <button class="round help" id="help" aria-label="Como usar a app" title="Como usar a app">?</button>
+  <button class="round hl" id="locate" aria-label="Centrar em mim" title="Centrar em mim"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg></button>
+  <button class="round hl" id="home" aria-label="Ver Portugal inteiro"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round"><path d="M12 2 4 21l8-4 8 4z"/></svg></button>
+  <button class="round help hl" id="help" aria-label="Como usar a app" title="Como usar a app">?</button>
   <button class="langbtn" id="lang" data-lang-toggle></button>
-  <button class="round" id="acct" aria-label="A minha conta" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+  <button class="round hl" id="acct" aria-label="A minha conta" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
 </div>
 
 
@@ -743,8 +756,10 @@ function addPlaces(style){
   const bold=font.map(f=>f.replace(/Regular|Italic/,'Bold'));
   const dark=isDark();
   // esconder os nomes de localidades do estilo (vinham por vezes em inglês, ex.: "Lisbon"); ficam países e regiões
-  for(const l of style.layers)if(l.type==='symbol'&&l['source-layer']==='place'&&!/country|continent|state|province/.test(l.id)){l.layout=l.layout||{};l.layout.visibility='none'}
   const name=['coalesce',['get','name:pt'],['get','name'],['get','name:latin']];
+  for(const l of style.layers)if(l.type==='symbol'&&l['source-layer']==='place'){l.layout=l.layout||{};
+    if(/country|continent|state|province/.test(l.id))l.layout['text-field']=name; // ex.: Castela-La Mancha e não Castile-La Mancha
+    else l.layout.visibility='none'}
   const nm=['coalesce',['get','name'],''];
   const cls=['get','class'];
   const big1=['in',nm,['literal',CIDADES1]],big2=['any',['in',nm,['literal',CIDADES2]],['==',cls,'city']];
